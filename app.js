@@ -1476,11 +1476,38 @@ function openScanModal(targetId) {
   $('#scanStatus').textContent = 'Point the camera at the barcode.';
   $('#scanModal').hidden = false;
   scanner = new Html5Qrcode('scanReader', { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E] });
+  $('#torchBtn').hidden = true;
+  torchOn = false;
   scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 250, height: 120 } }, onBarcodeDetected, () => {})
+    .then(setupTorch)
     .catch(err => { $('#scanStatus').textContent = `Camera failed: ${err}. Check camera permission in Settings.`; });
 }
 
+// Flashlight: only shown when the camera reports torch support (iOS 17.4+ Safari, most Android Chrome).
+let torchOn = false;
+let torchTrack = null;
+function setupTorch() {
+  const btn = $('#torchBtn');
+  try {
+    const video = document.querySelector('#scanReader video');
+    torchTrack = video && video.srcObject ? video.srcObject.getVideoTracks()[0] : null;
+    const caps = torchTrack && torchTrack.getCapabilities ? torchTrack.getCapabilities() : {};
+    btn.hidden = !caps.torch;
+    btn.textContent = 'Light on';
+  } catch (err) { btn.hidden = true; }
+}
+async function toggleTorch() {
+  if (!torchTrack) return;
+  try {
+    await torchTrack.applyConstraints({ advanced: [{ torch: !torchOn }] });
+    torchOn = !torchOn;
+    $('#torchBtn').textContent = torchOn ? 'Light off' : 'Light on';
+  } catch (err) { $('#scanStatus').textContent = `Flashlight failed: ${err}`; }
+}
+
 async function closeScanModal() {
+  if (torchOn && torchTrack) { try { await torchTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch (err) { /* ignore */ } }
+  torchOn = false; torchTrack = null;
   if (scanner) {
     try { await scanner.stop(); scanner.clear(); } catch (err) { /* already stopped */ }
     scanner = null;
@@ -1684,6 +1711,7 @@ async function init() {
   $('#searchForm').addEventListener('submit', handleSearchSubmit);
   $('#scanBarcodeBtn').addEventListener('click', () => openScanModal('logName'));
   $('#closeScanModal').addEventListener('click', closeScanModal);
+  $('#torchBtn').addEventListener('click', toggleTorch);
   $('#saveApiKeyBtn').addEventListener('click', handleSaveApiKey);
   $('#removeApiKeyBtn').addEventListener('click', handleRemoveApiKey);
   renderApiKeyStatus();

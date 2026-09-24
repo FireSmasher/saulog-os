@@ -388,7 +388,10 @@
   <div class="modal-sheet">
     <div class="row between">
       <h2 style="margin:0;">Scan barcode</h2>
-      <button type="button" class="ghost small" id="closeScanModal">Close</button>
+      <div class="row" style="gap:6px;">
+        <button type="button" class="ghost small" id="torchBtn" hidden>Light on</button>
+        <button type="button" class="ghost small" id="closeScanModal">Close</button>
+      </div>
     </div>
     <div id="scanReader" style="margin-top:10px;"></div>
     <div id="scanStatus" class="muted small" style="margin-top:8px;"></div>
