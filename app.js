@@ -123,6 +123,7 @@ async function seedFoodsIfEmpty() {
     for (const f of dataset) {
       const match = existingByName.get(f.name.toLowerCase());
       const row = { name: f.name, kcal100: f.kcal, protein100: f.protein, carb100: f.carb, fat100: f.fat, source: 'dataset' };
+      if (f.barcode) row.barcode = f.barcode;
       if (match) { row.id = match.id; await put('foods', row); }
       else { await add('foods', row); }
     }
