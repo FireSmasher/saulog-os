@@ -1023,7 +1023,16 @@ async function findRecipeByName(name) {
 }
 async function findFoodByBarcode(barcode) {
   const foods = window._foodsCache || await getAll('foods');
-  return foods.find(f => f.barcode === barcode);
+  const variants = barcodeVariants(barcode);
+  return foods.find(f => f.barcode && variants.includes(f.barcode));
+}
+// Scanners report the same product as UPC-A (12) or EAN-13 with a leading 0; try both.
+function barcodeVariants(code) {
+  const c = String(code).trim();
+  const out = [c];
+  if (c.length === 12) out.push('0' + c);
+  if (c.length === 13 && c.startsWith('0')) out.push(c.slice(1));
+  return out;
 }
 async function findExerciseByName(name) {
   const exercises = window._exercisesCache || await getAll('exercises');
@@ -1540,11 +1549,16 @@ async function onBarcodeDetected(code) {
 // library on a hit so future scans/typing of the same product resolve locally.
 async function lookupBarcodeLive(code) {
   try {
-    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=code,product_name,brands,nutriments`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const p = data.product;
+    let p = null;
+    for (const c of barcodeVariants(code)) {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(c)}.json?fields=code,product_name,brands,nutriments`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data.product) { p = data.product; break; }
+    }
     const n = p && p.nutriments;
+    // Some Lidl/Edeka entries only carry energy in kJ; convert rather than reject.
+    if (n && n['energy-kcal_100g'] == null && n.energy_100g != null) n['energy-kcal_100g'] = n.energy_100g / 4.184;
     if (!p || !n || n['energy-kcal_100g'] == null || n.proteins_100g == null || n.carbohydrates_100g == null || n.fat_100g == null) return null;
     const brand = (p.brands || '').split(',')[0].trim();
     let name = (p.product_name || '').trim();
