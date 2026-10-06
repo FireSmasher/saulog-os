@@ -89,7 +89,7 @@ Name the Shortcut something like "Health to Saulog" and save.
 Tap the Shortcut to run it. Then, on a Mac with the service config set up:
 
 ```
-cd ~/food-tracker-app && python3 scripts/query-logs.py --table health_logs --today
+cd ~/Documents/Projects/food-tracker-app && python3 scripts/query-logs.py --table health_logs --today
 ```
 
 A row should come back with your numbers in it. Open Buhat in the app (signed into Sync)
