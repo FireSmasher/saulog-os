@@ -718,8 +718,7 @@ const WORKOUT_GUIDE = {
     { ex: 'Leg Extension', sets: '3 x 12-15', cue: 'Recline the seat, lean back' },
     { ex: 'Seated Leg Curl', sets: '3 x 12-15', cue: 'Seated, never lying' },
     { ex: 'Standing Calf Raise', sets: '3 x 15-20', cue: 'Pause at the bottom' },
-    { ex: 'Hip Abduction', alt: ['Abduction'], sets: '2 x 12-15', cue: '' },
-    { ex: 'Hip Adduction', alt: ['Adduction'], sets: '2 x 12-15', cue: '' }
+    { ex: 'Hip Abduction', alt: ['Abduction'], sets: '2 x 12-15', cue: '' }
   ]
 };
 let guideSplit = 'Push';
