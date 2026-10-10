@@ -206,10 +206,10 @@ function formatFullDate(isoDate) {
 }
 const RESTAURANT_BUMP = 1.15;
 
-// Nippard system targets, set 14 Aug 2026 (~/Documents/claude/Nippard/03_NUTRITION/TARGETS.md).
+// Nippard system targets, updated 10 Oct 2026 for the cut (Nippard/03_NUTRITION/TARGETS.md).
 // This is only the offline/never-synced fallback now. See syncTargets() below, which
 // overrides it from Supabase's `targets` table (the Nippard -> Kain direction of the sync).
-const DEFAULT_TARGETS = { kcal: 2300, protein: 150, fat: 70, carb: 265 };
+const DEFAULT_TARGETS = { kcal: 2000, protein: 160, fat: 60, carb: 205 };
 let TARGETS = { ...DEFAULT_TARGETS };
 
 function loadCachedTargets() {
