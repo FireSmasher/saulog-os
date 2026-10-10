@@ -142,5 +142,9 @@
 {"name":"Lidl Makrelenfilets (smoked)","kcal":265,"protein":19,"carb":0,"fat":21},
 {"name":"Lidl Regenbogen Forellenfilets (smoked)","kcal":133,"protein":23,"carb":0,"fat":4.6},
 {"name":"Lidl Fischstäbchen (fish fingers)","kcal":185,"protein":13,"carb":15,"fat":7.9},
-{"name":"Lidl Fischerstolz Knusper-Backfisch (Alaska-Seelachs, breaded)","kcal":194,"protein":12.9,"carb":12.9,"fat":10.1,"barcode":"4335619139091"}
+{"name":"Lidl Fischerstolz Knusper-Backfisch (Alaska-Seelachs, breaded)","kcal":194,"protein":12.9,"carb":12.9,"fat":10.1,"barcode":"4335619139091"},
+{"name":"Lidl Grillmeister Hähnchen-Schwenksteaks Kräuter (500 g)","kcal":191,"protein":15.8,"carb":0.9,"fat":13.7,"barcode":"4056489816836"},
+{"name":"Lidl Grillmeister Hähnchen-Schwenksteaks Barbecue (500 g)","kcal":190,"protein":16,"carb":1.6,"fat":13.3,"barcode":"4335619421035"},
+{"name":"Lidl Metzgerfrisch Chicken Wings scharf (1100 g)","kcal":180,"protein":18,"carb":0,"fat":12,"barcode":"4056489789079"},
+{"name":"Lidl Metzgerfrisch Hähnchen-Geschnetzeltes Gyros Art (400 g)","kcal":151,"protein":18,"carb":0.8,"fat":8.4,"barcode":"4335619113671"}
 ]
