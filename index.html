@@ -71,6 +71,13 @@
   button.ghost.danger { color: var(--danger); }
   .undo-toast button.ghost { color: var(--accent); border-color: var(--accent); }
   .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  #guideCard summary { cursor: pointer; list-style: none; }
+  #guideCard summary::-webkit-details-marker { display: none; }
+  #guideChips button.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .grow { display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); cursor: pointer; }
+  .grow:first-child { border-top: 0; }
+  .grow .gname { font-weight: 600; }
+  .grow .gsets { white-space: nowrap; font-weight: 600; }
   .badge { font-size: 10px; background: #f1e6d0; color: var(--accent); padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
   .datenav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .datenav button { background: var(--card); color: var(--text); border: 1px solid var(--border); }
@@ -215,6 +222,19 @@
       <button id="wTodayBtn" class="ghost small">today</button>
     </div>
     <button id="wNextDay">›</button>
+  </div>
+
+  <div class="card" id="guideCard">
+    <details id="guideDetails" open>
+      <summary><strong>Workout guide</strong> <span class="muted small">Nippard block, weeks 5 to 8, stop 1 rep short of failure</span></summary>
+      <div class="row" id="guideChips" style="gap:6px; margin:8px 0;">
+        <button type="button" class="ghost small" data-guide="Push">Push</button>
+        <button type="button" class="ghost small" data-guide="Pull">Pull</button>
+        <button type="button" class="ghost small" data-guide="Legs">Legs</button>
+      </div>
+      <div id="guideBody"></div>
+      <div class="muted small" style="margin-top:8px;">Tap an exercise to load it into the form below. Top of the rep range on every set, then add the smallest increment.</div>
+    </details>
   </div>
 
   <form id="weightForm" class="card">

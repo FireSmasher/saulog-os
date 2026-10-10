@@ -33,5 +33,11 @@
   { "name": "Standing Calf Raise", "muscle": "Calves", "split": "Legs" },
   { "name": "Smith Machine Squat", "muscle": "Quads/Glutes", "split": "Legs" },
 
-  { "name": "Yoga Cooldown", "muscle": "Full Body/Mobility", "split": "Cardio" }
+  { "name": "Yoga Cooldown", "muscle": "Full Body/Mobility", "split": "Cardio" },
+  { "name": "Lever Row", "muscle": "Back", "split": "Pull" },
+  { "name": "Cable Curl", "muscle": "Biceps", "split": "Pull" },
+  { "name": "EZ Preacher Curl", "muscle": "Biceps", "split": "Pull" },
+  { "name": "Machine Pec Flys", "muscle": "Chest", "split": "Push" },
+  { "name": "Hip Abduction", "muscle": "Glutes/Hips", "split": "Legs" },
+  { "name": "Hip Adduction", "muscle": "Adductors", "split": "Legs" }
 ]

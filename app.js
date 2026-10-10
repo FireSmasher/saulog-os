@@ -519,6 +519,7 @@ async function refreshAll() {
   await renderRecipeList();
   await renderExerciseDatalist();
   await renderWorkouts();
+  await renderGuide();
   await renderWeight();
   await renderHealth();
   await renderQuarters();
@@ -690,6 +691,67 @@ function renderTargets(totals) {
         <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${pct}%"></div></div>
       </div>`;
   }).join('');
+}
+
+// ---------- Workout guide (Nippard block, 10 Oct 2026) ----------
+// Source of truth is Nippard/02_TRAINING/CURRENT BLOCK.md. Update both together.
+const WORKOUT_GUIDE = {
+  Push: [
+    { ex: 'Low-Incline DB Press', alt: ['DB Bench Press'], sets: '3 x 8-10', cue: 'Bench at 30 degrees' },
+    { ex: 'Seated DB Overhead Press', sets: '3 x 8-10', cue: '' },
+    { ex: 'Single-Arm Cable Lateral Raise', sets: '3 x 12-15 /side', cue: 'Second on Push day, stay strict' },
+    { ex: 'Cable Fly', sets: '2 x 12-15', cue: 'The stretch is the working half' },
+    { ex: 'Machine Pec Flys', sets: '2 x 10-12', cue: '' },
+    { ex: 'Overhead Cable Tricep Extension', alt: ['Tricep Extension'], sets: '3 x 10-12', cue: 'Keep it overhead' }
+  ],
+  Pull: [
+    { ex: 'One-Arm Lat Pulldown', sets: '3 x 10-12 /side', cue: '' },
+    { ex: 'Lever Row', sets: '3 x 8-10', cue: 'Own 8 clean reps per set, no grinding' },
+    { ex: 'Seated Cable Row', alt: ['Seated Pulley'], sets: '3 x 10-12', cue: '' },
+    { ex: 'Face Pulls', sets: '3 x 15', cue: '' },
+    { ex: 'Cross-Body Hammer Curls', sets: '3 x 10-12', cue: '' },
+    { ex: 'Cable Curl', alt: ['Cable curls'], sets: '2 x 10-12', cue: 'Or EZ Preacher Curl, pick one' },
+    { ex: 'Superman Holds', sets: '3 x 15', cue: 'Add hold time' }
+  ],
+  Legs: [
+    { ex: 'Leg Press', sets: '3 x 8-10', cue: '' },
+    { ex: 'Leg Extension', sets: '3 x 12-15', cue: 'Recline the seat, lean back' },
+    { ex: 'Seated Leg Curl', sets: '3 x 12-15', cue: 'Seated, never lying' },
+    { ex: 'Standing Calf Raise', sets: '3 x 15-20', cue: 'Pause at the bottom' },
+    { ex: 'Hip Abduction', alt: ['Abduction'], sets: '2 x 12-15', cue: '' },
+    { ex: 'Hip Adduction', alt: ['Adduction'], sets: '2 x 12-15', cue: '' }
+  ]
+};
+let guideSplit = 'Push';
+
+async function renderGuide() {
+  const body = $('#guideBody');
+  if (!body) return;
+  $$('#guideChips button').forEach(b => b.classList.toggle('active', b.dataset.guide === guideSplit));
+  let last = {};
+  try {
+    const all = (await getAll('workouts')).filter(w => !pendingDeletes.workouts.has(w.id) && Array.isArray(w.sets) && w.sets.length);
+    all.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+    for (const w of all) last[w.exercise.toLowerCase()] = w;
+  } catch {}
+  body.innerHTML = (WORKOUT_GUIDE[guideSplit] || []).map(r => {
+    const w = [r.ex, ...(r.alt || [])].map(n => last[n.toLowerCase()]).filter(Boolean).sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')))[0];
+    const prev = w ? w.sets.map(s => `${s.weight}\u00d7${s.reps}`).join(', ') : 'not logged yet';
+    return `<div class="grow" data-ex="${escapeHtml(r.ex)}">
+      <div><div class="gname">${escapeHtml(r.ex)}</div>
+        <div class="muted small">last: ${escapeHtml(prev)}${r.cue ? ' \u00b7 ' + escapeHtml(r.cue) : ''}</div></div>
+      <div class="gsets">${escapeHtml(r.sets)}</div></div>`;
+  }).join('');
+}
+
+async function pickGuideExercise(name) {
+  $('#wExercise').value = name;
+  const split = guideSplit;
+  if ($('#wSplit').value !== split) { $('#wSplit').value = split; updateSplitFieldVisibility(); }
+  await lookupMuscle();
+  prefillLastWeight();
+  $('#wWeight').focus();
+  $('#workoutForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function renderWorkouts() {
@@ -1743,6 +1805,12 @@ async function init() {
   $('#cardioTime').addEventListener('change', maybeAutoCardioPace);
   updateSplitFieldVisibility();
   updateCardioOtherVisibility();
+  $$('#guideChips button').forEach(btn => btn.addEventListener('click', () => { guideSplit = btn.dataset.guide; renderGuide(); }));
+  $('#guideBody').addEventListener('click', e => { const row = e.target.closest('.grow'); if (row) pickGuideExercise(row.dataset.ex); });
+  $('#wSplit').addEventListener('change', () => { const v = $('#wSplit').value; if (WORKOUT_GUIDE[v]) { guideSplit = v; renderGuide(); } });
+  try { $('#guideDetails').open = localStorage.getItem('saulog_guide_open') !== '0'; } catch {}
+  $('#guideDetails').addEventListener('toggle', () => { try { localStorage.setItem('saulog_guide_open', $('#guideDetails').open ? '1' : '0'); } catch {} });
+
   $('#wPrevDay').addEventListener('click', () => shiftDate(-1));
   $('#wNextDay').addEventListener('click', () => shiftDate(1));
   $('#wTodayBtn').addEventListener('click', () => { currentDate = todayStr(); renderLog(); renderWorkouts(); renderWeight(); });
