@@ -727,3 +727,25 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - sw.js CACHE bumped to food-tracker-v23 so phones pick the change up.
 - Checked: node --check app.js, headless load with no console errors. Not checked: the button
   against live Supabase (needs his signed-in phone).
+
+## UPDATE 2026-10-31 (end of the overnight run: phases 2 to 7 built, polish done)
+- Polish: Buhat and the capture screen load on first use (main file 508 kB to 488 kB); the
+  shared pill-chip style moved to base.css (the split had left Buhat's session chips unstyled,
+  caught by screenshot and fixed before push). 30 tests pass, build clean, deploy green.
+- MORNING PASTE, in this order (the app works without them, minus AI photo reading, photo
+  thumbnails, rest-day sync and the reminder):
+  1. `cat supabase/next-setup.sql | pbcopy`, Supabase dashboard > SQL Editor > paste > Run.
+  2. Edge Functions > Deploy new function > Via Editor, name `food-parse`, paste
+     supabase/functions/food-parse/index.ts, keep "Enforce JWT verification" ON.
+     Edge Functions > Secrets: add ANTHROPIC_API_KEY (he pastes it).
+  3. Same for `push-daily` (supabase/functions/push-daily/index.ts), then turn JWT
+     verification OFF. Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET from
+     next/.secrets/push.env.
+  4. `cat next/.secrets/cron.sql | pbcopy`, SQL Editor > paste > Run.
+  5. Phone: open the old app once (new link card plus Settings > "Send N unsent logs"),
+     then https://firesmasher.github.io/saulog-os/next/ > Share > Add to Home Screen, open it
+     from the home screen, sign in, turn on the daily reminder.
+- Not verified tonight: both Edge Functions (no Deno, no Supabase CLI on the Mac), the unsent
+  button against live data, push on a real iPhone. All need his phone or his paste.
+- Next session: `/model opus`, `/effort high`. Prompt: "Saulog OS: read HANDOFF.md tail, I ran
+  the morning paste, check food-parse and push-daily logs and fix what broke."
