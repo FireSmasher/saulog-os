@@ -17,6 +17,8 @@ import {
   type WeekDot,
 } from '../lib/day'
 import type { KainData } from '../lib/food'
+import type { saveMeal } from '../lib/capture'
+import { Capture, type CaptureMode } from './Capture'
 import {
   BarcodeIcon,
   CameraIcon,
@@ -34,6 +36,8 @@ export type KainApi = {
   deleteLog: (id: string) => Promise<void>
   readCache: () => KainData | null
   writeCache: (data: KainData) => void
+  saveMeal: typeof saveMeal
+  deleteLogs: (ids: string[]) => Promise<void>
 }
 
 export type ToastAction = { label: string; run: () => void }
@@ -42,7 +46,7 @@ type Props = {
   api: KainApi
   footer?: ReactNode
   onToast: (text: string, action?: ToastAction) => void
-  onCapture: () => void
+  plusSignal: number // goes up each time the + in the tab bar is tapped
 }
 
 function todayLabel(date = new Date()): string {
@@ -97,11 +101,53 @@ function UsualChip({ item, onTap }: { item: Usual; onTap: (u: Usual) => void }) 
 
 // ---------- Screen ----------
 
-export function Kain({ api, footer, onToast, onCapture }: Props) {
+export function Kain({ api, footer, onToast, plusSignal }: Props) {
   const [data, setData] = useState<KainData | null>(() => api.readCache())
   const [error, setError] = useState('')
   const [now, setNow] = useState(() => new Date())
+  const [capture, setCapture] = useState<{ mode: CaptureMode; file?: File } | null>(() => {
+    // Dev only: ?demo&capture=voice opens the capture screen for screenshots.
+    const m = import.meta.env.DEV ? new URLSearchParams(location.search).get('capture') : null
+    return m ? { mode: m as CaptureMode } : null
+  })
   const loading = useRef(false)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const lastPlus = useRef(plusSignal)
+
+  useEffect(() => {
+    if (plusSignal !== lastPlus.current) {
+      lastPlus.current = plusSignal
+      setCapture({ mode: 'plate' })
+    }
+  }, [plusSignal])
+
+  // The camera has to open inside the tap itself (iOS rule), so the next-meal card
+  // clicks a file input here and the capture screen opens with the photo in hand.
+  const openCamera = () => cameraRef.current?.click()
+
+  function logged(rows: FoodLog[]) {
+    setCapture(null)
+    setData((d) => {
+      if (!d) return d
+      const next = { ...d, history: [...d.history, ...rows] }
+      api.writeCache(next)
+      return next
+    })
+    const kcal = rows.reduce((t, r) => t + r.kcal, 0)
+    onToast(`Logged ${rows.length} ${rows.length === 1 ? 'food' : 'foods'} · ${fmt(kcal)} kcal`, {
+      label: 'Undo',
+      run: async () => {
+        const ids = new Set(rows.map((r) => r.id))
+        setData((d) => d && { ...d, history: d.history.filter((l) => !ids.has(l.id)) })
+        try {
+          await api.deleteLogs([...ids])
+        } catch {
+          onToast('Could not undo. Check your connection.')
+          void refresh()
+        }
+      },
+    })
+  }
 
   const today = localDate(now)
 
@@ -236,7 +282,19 @@ export function Kain({ api, footer, onToast, onCapture }: Props) {
         <p className="small muted offline-note">Showing your last saved day. Could not refresh: {error}</p>
       )}
 
-      <button className="next-card" onClick={onCapture}>
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          e.target.value = ''
+          if (file) setCapture({ mode: 'photo', file })
+        }}
+      />
+      <button className="next-card" onClick={openCamera}>
         <span className="next-icon">
           <CameraIcon />
         </span>
@@ -296,15 +354,15 @@ export function Kain({ api, footer, onToast, onCapture }: Props) {
       </section>
 
       <div className="ways">
-        <button className="way" onClick={onCapture}>
+        <button className="way" onClick={() => setCapture({ mode: 'voice' })}>
           <MicIcon />
           Say it
         </button>
-        <button className="way" onClick={onCapture}>
+        <button className="way" onClick={() => setCapture({ mode: 'scan' })}>
           <BarcodeIcon />
           Scan
         </button>
-        <button className="way" onClick={onCapture}>
+        <button className="way" onClick={() => setCapture({ mode: 'search' })}>
           <SearchIcon />
           Search
         </button>
@@ -354,6 +412,17 @@ export function Kain({ api, footer, onToast, onCapture }: Props) {
       )}
 
       {footer}
+
+      {capture && (
+        <Capture
+          mode={capture.mode}
+          initialFile={capture.file}
+          history={data.history}
+          saveRows={api.saveMeal}
+          onClose={() => setCapture(null)}
+          onLogged={logged}
+        />
+      )}
     </>
   )
 }

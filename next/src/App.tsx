@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { rememberedEmail, supabase } from './lib/supabase'
-import { clearCache, deleteLog, loadKain, logAgain, readCache, writeCache } from './lib/food'
+import { clearCache, deleteLog, deleteLogs, loadKain, logAgain, readCache, writeCache } from './lib/food'
+import { saveMeal } from './lib/capture'
 import { TabBar, type Tab } from './components/TabBar'
 import { Kain, type KainApi, type ToastAction } from './components/Kain'
 
@@ -80,6 +81,8 @@ function useLiveApi(session: Session | null | undefined): KainApi | null {
             deleteLog,
             readCache: () => readCache(userId),
             writeCache: (d) => writeCache(userId, d),
+            saveMeal,
+            deleteLogs,
           }
         : null,
     [userId],
@@ -93,6 +96,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [demoApi, setDemoApi] = useState<KainApi | null>(null)
   const [toast, setToast] = useState<Toast | null>(null)
+  const [plusSignal, setPlusSignal] = useState(0)
   const toastTimer = useRef<number | undefined>(undefined)
   const liveApi = useLiveApi(session)
 
@@ -112,7 +116,10 @@ export default function App() {
     toastTimer.current = window.setTimeout(() => setToast(null), action ? 4500 : 2600)
   }
 
-  const comingSoon = () => showToast('Photo, voice and barcode logging come in step 3. Tap a usual food to log it now.')
+  function onPlus() {
+    setTab('kain')
+    setPlusSignal((n) => n + 1)
+  }
 
   async function signOut() {
     if (session) clearCache(session.user.id)
@@ -130,7 +137,7 @@ export default function App() {
               key={DEMO ? 'demo' : session?.user.id}
               api={api}
               onToast={showToast}
-              onCapture={comingSoon}
+              plusSignal={plusSignal}
               footer={
                 !DEMO &&
                 session && (
@@ -178,7 +185,7 @@ export default function App() {
           )}
         </div>
       )}
-      <TabBar tab={tab} onTab={setTab} onPlus={comingSoon} />
+      <TabBar tab={tab} onTab={setTab} onPlus={onPlus} />
     </>
   )
 }

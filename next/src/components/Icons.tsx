@@ -101,3 +101,19 @@ export function SearchIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function CloseIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={2} className={className}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  )
+}
+
+export function MinusIcon({ className }: IconProps) {
+  return (
+    <svg {...base} strokeWidth={2.2} className={className}>
+      <path d="M5 12h14" />
+    </svg>
+  )
+}

@@ -14,7 +14,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://world.openfoodfacts.org",
   "manifest-src 'self'",
   "worker-src 'self'",
   "base-uri 'none'",
@@ -60,6 +60,32 @@ function serviceWorker(): Plugin {
   }
 }
 
+// The food library the old app ships (foods.json, germany_foods.json at the repo root),
+// merged into one compact file: [name, kcal, protein, carb, fat, barcode] per 100 g.
+// Same in dev (served by the dev server) and build (emitted, so the worker caches it).
+function foodLibrary(): Plugin {
+  const build = () => {
+    type Row = { name: string; kcal: number; protein: number; carb: number; fat: number; barcode?: string }
+    const rows: Row[] = [
+      ...JSON.parse(readFileSync('../foods.json', 'utf8')),
+      ...JSON.parse(readFileSync('../germany_foods.json', 'utf8')),
+    ]
+    return JSON.stringify(rows.map((r) => [r.name, r.kcal, r.protein, r.carb, r.fat, r.barcode ?? '']))
+  }
+  return {
+    name: 'saulog-food-library',
+    configureServer(server) {
+      server.middlewares.use(BASE + 'data/foods.json', (_req, res) => {
+        res.setHeader('Content-Type', 'application/json')
+        res.end(build())
+      })
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'data/foods.json', source: build() })
+    },
+  }
+}
+
 // The CSP goes in only at build time: the dev server needs inline scripts for hot reload.
 function contentSecurityPolicy(): Plugin {
   return {
@@ -73,6 +99,6 @@ function contentSecurityPolicy(): Plugin {
 
 export default defineConfig({
   base: BASE,
-  plugins: [react(), contentSecurityPolicy(), serviceWorker()],
+  plugins: [react(), foodLibrary(), contentSecurityPolicy(), serviceWorker()],
   build: { target: 'es2022', sourcemap: false },
 })

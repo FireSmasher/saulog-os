@@ -683,3 +683,14 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - Checks: `cd next && npm test` (10 logic tests, Berlin time zone, includes the 25 Oct clock change) and `npm run build`. Both passed 31 Oct.
 - Watch: the OLD app never reads Supabase (it pushes only, from its own phone storage). So meals tapped in the new app do not show in the old app, and any old-app meal that failed to sync is missing from the new app. Read totals in the new app. The old app also dates rows by UTC (`toISOString`), so a meal logged between 00:00 and 01:00 Berlin lands on the day before.
 - Next: phase 3, Log a meal. /model opus, /effort high.
+
+## UPDATE 2026-10-31 (rebuild phase 3 Log a meal, Sevro, overnight run)
+- One capture screen (`next/src/components/Capture.tsx`): Photo, Hold to talk, Scan, Search, all onto one plate with gram steppers and source tags (Said, Guess from photo, Barcode, Check grams, AI estimate, Pick a food), When chips (Now, Breakfast, Lunch, Dinner = his usual time), one Log button. Undo after logging.
+- Opens from: the next-meal card (camera opens inside the tap, iOS rule), the + button, and the Say it / Scan / Search chips.
+- Works WITHOUT the AI: spoken or typed text is parsed on the phone (`next/src/lib/plate.ts` parseSpoken: g, kg, ml, l, tbsp/spoon 15 g, tsp 5 g, cup 240 g, scoop 30 g, pieces like "two eggs" 120 g marked Check grams) and matched to his own foods first (worked back per 100 g from his rows), then the 3,610-row library (foods.json + germany_foods.json merged by vite into `data/foods.json`). A food that matches nothing blocks Log until he picks one.
+- Barcode: html5-qrcode 2.3.8 (lazy chunk, gate in docs/tool-reviews), his rows first, then the library, then OpenFoodFacts live (added to the CSP). Typing the digits works when the camera does not.
+- AI: Supabase Edge Function `supabase/functions/food-parse/index.ts`, claude-sonnet-5-5 (his pick), effort medium, strict tool `record_plate`, server-side fallback on (`fallbacks: "default"`, retries once without it on a 400). Asked only when there is a photo or an unmatched food. AI foods are matched to his library first; only unmatched ones keep the AI's numbers ("AI estimate"). Until deployed it says "Photo reading is not switched on yet".
+- Photo: 1024 px copy to the AI, 320 px thumbnail to the private bucket `meal-photos` plus a `food_photos` row; both need `supabase/next-setup.sql` run first, until then skipped quietly.
+- Rows written: same food_logs columns as the old app, notes start "saulog-next:" with the sources.
+- Checks: `npm test` 16 pass, `npm run build` pass, capture screen screenshot checked in dev with `?demo&capture=voice&said=...` (dev only).
+- HIS PASTES (morning): run next-setup.sql; deploy food-parse in the dashboard; paste ANTHROPIC_API_KEY into Edge Functions secrets.

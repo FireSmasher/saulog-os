@@ -1,11 +1,11 @@
 import { supabase, loadTargets, type Targets } from './supabase'
 import { addDays, localTime, streak, type FoodLog } from './day'
 
-const COLUMNS = 'id, date, time, name, grams, kcal, protein, carb, fat, is_restaurant, item_type, item_id'
+export const COLUMNS = 'id, date, time, name, grams, kcal, protein, carb, fat, is_restaurant, item_type, item_id'
 const PAGE = 1000 // Supabase returns at most 1,000 rows per request
 export const HISTORY_DAYS = 42 // six weeks for usual foods and usual meal times
 
-function toLog(r: Record<string, unknown>): FoodLog {
+export function toLog(r: Record<string, unknown>): FoodLog {
   return {
     id: String(r.id),
     date: String(r.date),
@@ -98,6 +98,11 @@ export async function logAgain(template: FoodLog, today: string): Promise<FoodLo
     .single()
   if (error) throw error
   return toLog(data)
+}
+
+export async function deleteLogs(ids: string[]): Promise<void> {
+  const { error } = await supabase.from('food_logs').delete().in('id', ids)
+  if (error) throw error
 }
 
 export async function deleteLog(id: string): Promise<void> {
