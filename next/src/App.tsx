@@ -6,6 +6,7 @@ import { saveMeal } from './lib/capture'
 import { TabBar, type Tab } from './components/TabBar'
 import { Kain, type KainApi, type ToastAction } from './components/Kain'
 import { Buhat, type BuhatApi } from './components/Buhat'
+import { Reminder } from './components/Reminder'
 import { loadWorkouts, readWorkoutCache, removeLastSet, saveSet, writeWorkoutCache } from './lib/workouts'
 
 // Dev only: http://localhost:5173/saulog-os/next/?demo shows made-up data, no sign-in.
@@ -170,12 +171,15 @@ export default function App() {
               footer={
                 !DEMO &&
                 session && (
+                  <>
+                  <Reminder />
                   <div className="footer-line small muted">
                     <span>{session.user.email}</span>
                     <button className="link-btn" onClick={signOut}>
                       Sign out
                     </button>
                   </div>
+                  </>
                 )
               }
             />

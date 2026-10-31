@@ -383,3 +383,29 @@
   width: 12px;
   height: 12px;
 }
+
+.reminder p {
+  margin: 0;
+}
+
+.reminder-row {
+  display: flex;
+  gap: 8px;
+}
+
+.reminder-row select {
+  flex: 1;
+  height: 48px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0 16px;
+  font: 600 16px/1 var(--font);
+  color: var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.reminder-row .btn {
+  flex: 1;
+}

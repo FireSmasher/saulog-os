@@ -51,3 +51,34 @@ self.addEventListener('fetch', (event) => {
   // Built files have a content hash in their name, so the cached copy is always right.
   event.respondWith(caches.match(request, { cacheName: CACHE }).then((hit) => hit || fetch(request)))
 })
+
+// ---------- Daily reminder (phase 6) ----------
+// The Edge Function push-daily sends {title, body, url}. Tapping opens the app.
+self.addEventListener('push', (event) => {
+  let data = { title: 'Saulog OS', body: 'Nothing logged yet today. Snap your next meal.', url: './' }
+  try {
+    if (event.data) data = { ...data, ...event.data.json() }
+  } catch {
+    // plain text push: keep the default words
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: './icons/icon-192.png',
+      badge: './icons/icon-192.png',
+      tag: 'saulog-daily',
+      data: { url: data.url },
+    })
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const target = new URL(event.notification.data?.url || './', self.registration.scope).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      const open = wins.find((w) => w.url.startsWith(self.registration.scope))
+      return open ? open.focus() : self.clients.openWindow(target)
+    })
+  )
+})

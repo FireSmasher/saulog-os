@@ -708,3 +708,10 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - Rows: one workout_logs row per exercise per day, sets [{weight, reps}] appended, notes "saulog-next", muscle word filled. Same shape as the old app.
 - XP: workout day +15 (phase 4), each best set ever +25 (counted from all rows, so it stays right).
 - Checks: npm test 30 pass, build pass, Buhat screenshot checked with `?demo&tab=buhat` (dev only).
+
+## UPDATE 2026-10-31 (rebuild phase 6 Push reminder, Sevro, overnight run)
+- Phone side: `next/src/lib/push.ts` + `next/src/components/Reminder.tsx` (card at the bottom of Kain): pick a time (12:00 to 22:00, default 20:00), Turn on asks permission inside the tap, subscribes with the public VAPID key and saves a `push_subscriptions` row. Outside the Home Screen app it explains Share, Add to Home Screen (iOS needs that, 16.4+).
+- Service worker: push shows "Kain: Nothing logged yet today. One photo keeps your streak going."; tapping opens the app.
+- Server: Edge Function `supabase/functions/push-daily/index.ts` (npm:web-push 3.6.7, not run yet: no Deno here, so first real run is after deploy), called every 15 min by pg_cron (`supabase/next-cron.sql`). Sends at most one a day per phone, only in the 3 hours after his time, only if food_logs has nothing for his local today; drops phones that unsubscribed (404/410). Protected by CRON_SECRET.
+- Keys: made fresh on the Mac 31 Oct. Public key is in push.ts. Private key and CRON_SECRET are ONLY in `next/.secrets/push.env` (git-ignored, mode 600); `next/.secrets/cron.sql` is next-cron.sql with the real secret filled in.
+- HIS PASTES: next-setup.sql (now also push_subscriptions); deploy push-daily with JWT verification OFF; secrets VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET from push.env; then run next/.secrets/cron.sql in the SQL editor.
