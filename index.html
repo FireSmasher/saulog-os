@@ -138,6 +138,10 @@
 <div id="scrollArea">
 
 <div id="panel-kain" class="panel active">
+  <a href="./next/" class="card" style="display:block; text-decoration:none; color:inherit; margin-bottom:12px;">
+    <strong>The new Kain and Buhat are ready.</strong>
+    <span class="muted small" style="display:block;">Photo, voice and barcode logging, streaks, and your body map. Tap to open. Quarters stays here.</span>
+  </a>
   <div class="subnav">
     <button class="subtab active" data-subtab="klog">Log</button>
     <button class="subtab" data-subtab="krecipes">Recipes</button>
@@ -384,6 +388,8 @@
       <button type="button" class="primary" id="syncSignInBtn">Sign in</button>
     </div>
     <button type="button" class="ghost small" id="syncSignOutBtn" style="display:none;">Sign out</button>
+    <button type="button" class="primary small" id="sendUnsentBtn" style="display:none; margin-top:8px;">Send unsent logs</button>
+    <div id="unsentStatus" class="muted small" style="margin-top:6px;"></div>
     <p class="muted small" style="margin-top:10px; margin-bottom:0;">Signing in lets every food and workout log also write to your private Supabase database, so a Nippard or Sevro session can read it when you ask for analysis. Nothing changes about what's stored on this phone. This only adds a copy going out, and only for entries logged while signed in and online.</p>
   </div>
 </div>

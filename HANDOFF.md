@@ -715,3 +715,15 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - Server: Edge Function `supabase/functions/push-daily/index.ts` (npm:web-push 3.6.7, not run yet: no Deno here, so first real run is after deploy), called every 15 min by pg_cron (`supabase/next-cron.sql`). Sends at most one a day per phone, only in the 3 hours after his time, only if food_logs has nothing for his local today; drops phones that unsubscribed (404/410). Protected by CRON_SECRET.
 - Keys: made fresh on the Mac 31 Oct. Public key is in push.ts. Private key and CRON_SECRET are ONLY in `next/.secrets/push.env` (git-ignored, mode 600); `next/.secrets/cron.sql` is next-cron.sql with the real secret filled in.
 - HIS PASTES: next-setup.sql (now also push_subscriptions); deploy push-daily with JWT verification OFF; secrets VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET from push.env; then run next/.secrets/cron.sql in the SQL editor.
+
+## UPDATE 2026-10-31 (rebuild phase 7 Switch, the part that can be built tonight)
+- The switch itself is Edwin's: he uses /next/ on his phone for a few days. Root app stays for Quarters.
+- Old app, Kain tab: link card at the top, "The new Kain and Buhat are ready", opens ./next/.
+- Old app, Settings sync card: "Send N unsent logs" button (shows only when signed in and N > 0).
+  Sends every IndexedDB food and workout entry with no supaId, same column mapping as the normal
+  inserts. Before sending it reads the keys already in Supabase (food: date|time|name, workout:
+  date|exercise) and only matches those, so nothing is ever doubled. Each sent or matched entry gets
+  its supaId stored, so pressing again is safe.
+- sw.js CACHE bumped to food-tracker-v23 so phones pick the change up.
+- Checked: node --check app.js, headless load with no console errors. Not checked: the button
+  against live Supabase (needs his signed-in phone).

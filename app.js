@@ -475,11 +475,83 @@ function renderSyncStatus() {
     status.textContent = `✓ Signed in as ${session.email}. New logs sync while online.`;
     signedOutBox.style.display = 'none';
     signOutBtn.style.display = 'inline-block';
+    renderUnsent();
   } else {
     status.textContent = 'Signed out. Logs stay phone-only until you sign in.';
     signedOutBox.style.display = 'block';
     signOutBtn.style.display = 'none';
   }
+}
+
+// ---------- Send unsent logs (31 Oct 2026, for the switch to /next/) ----------
+// Food and workout entries saved on this phone while offline or signed out never reached
+// Supabase. The new app reads only Supabase, so this sends them once. An entry that is
+// sent gets its supaId stored, so pressing again never sends it twice.
+async function unsentEntries() {
+  const logs = (await getAll('logs')).filter(e => !e.supaId);
+  const workouts = (await getAll('workouts')).filter(e => !e.supaId);
+  return { logs, workouts };
+}
+async function renderUnsent() {
+  const btn = $('#sendUnsentBtn');
+  if (!btn) return;
+  try {
+    const { logs, workouts } = await unsentEntries();
+    const n = logs.length + workouts.length;
+    btn.style.display = n ? 'inline-block' : 'none';
+    btn.textContent = `Send ${n} unsent ${n === 1 ? 'log' : 'logs'}`;
+    $('#unsentStatus').textContent = n ? `${logs.length} food and ${workouts.length} workout entries are only on this phone.` : 'Every log on this phone is in Supabase.';
+  } catch { /* store not ready */ }
+}
+// Keys of rows already in Supabase, so an entry that got there some other way is never doubled.
+async function remoteKeys(table, cols, keyOf) {
+  const keys = new Map();
+  for (let offset = 0; ; offset += 1000) {
+    const res = await supabaseRequest(`/rest/v1/${table}?select=id,${cols}&order=id&limit=1000&offset=${offset}`, { method: 'GET' });
+    if (!res || !res.ok) return null;
+    const rows = await res.json();
+    rows.forEach(r => keys.set(keyOf(r), r.id));
+    if (rows.length < 1000) return keys;
+  }
+}
+const foodKey = r => `${r.date}|${String(r.time || '').slice(0, 5)}|${r.name}`;
+const workoutKey = r => `${r.date}|${r.exercise}`;
+
+async function sendUnsent() {
+  const btn = $('#sendUnsentBtn');
+  btn.disabled = true;
+  const { logs, workouts } = await unsentEntries();
+  const haveFood = await remoteKeys('food_logs', 'date,time,name', foodKey);
+  const haveWorkout = await remoteKeys('workout_logs', 'date,exercise', workoutKey);
+  if (!haveFood || !haveWorkout) {
+    btn.disabled = false;
+    $('#unsentStatus').textContent = 'Could not reach Supabase. Check you are online and signed in, then press again.';
+    return;
+  }
+  let sent = 0, failed = 0, already = 0;
+  for (const e of logs) {
+    const found = haveFood.get(foodKey(e));
+    if (found) { e.supaId = found; await put('logs', e); already++; continue; }
+    const id = await syncInsert('food_logs', {
+      date: e.date, time: e.time, name: e.name, grams: e.grams, notes: e.notes || null,
+      kcal: e.kcal, protein: e.protein, carb: e.carb, fat: e.fat,
+      is_restaurant: !!e.isRestaurant, item_type: e.itemType || null, item_id: e.itemId != null ? String(e.itemId) : null
+    });
+    if (id) { e.supaId = id; await put('logs', e); sent++; } else failed++;
+  }
+  for (const e of workouts) {
+    const found = haveWorkout.get(workoutKey(e));
+    if (found) { e.supaId = found; await put('workouts', e); already++; continue; }
+    const id = await syncInsert('workout_logs', {
+      date: e.date, time: e.time, split: e.split, exercise: e.exercise,
+      muscle: e.muscle || null, sets: e.cardio || e.sets, notes: e.notes || null
+    });
+    if (id) { e.supaId = id; await put('workouts', e); sent++; } else failed++;
+  }
+  btn.disabled = false;
+  await renderUnsent();
+  const was = already ? ` ${already} were already there, so they were matched, not sent again.` : '';
+  $('#unsentStatus').textContent = failed ? `Sent ${sent}.${was} ${failed} did not go through: check you are online and signed in, then press again.` : `Sent ${sent}.${was} Every log on this phone is in Supabase.`;
 }
 
 async function handleSyncSignIn() {
@@ -1821,6 +1893,7 @@ async function init() {
 
   $('#syncSignInBtn').addEventListener('click', handleSyncSignIn);
   $('#syncSignOutBtn').addEventListener('click', handleSyncSignOut);
+  $('#sendUnsentBtn').addEventListener('click', sendUnsent);
   renderSyncStatus();
   syncTargets();
 
