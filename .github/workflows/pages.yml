@@ -1,0 +1,63 @@
+# Deploys GitHub Pages on every push to main.
+# Root of the site: the old app's own files, byte for byte (Quarters still lives there).
+# /next/: the new app, built from next/ with Vite.
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: next/package-lock.json
+
+      - name: Install (no install scripts)
+        working-directory: next
+        run: npm ci --ignore-scripts
+
+      - name: Type check and build the new app
+        working-directory: next
+        run: npm run build
+
+      - name: Put the site together
+        run: |
+          mkdir -p _site
+          # Old app files only: no source of the new app, no docs, scripts, SQL or notes.
+          git ls-files -z \
+            | grep -zvE '^(next|docs|scripts|supabase|\.github)/|\.md$|^\.' \
+            | xargs -0 cp --parents -t _site
+          cp -R next/dist _site/next
+          test -f _site/index.html && test -f _site/app.js && test -f _site/next/index.html && test -f _site/next/sw.js
+          find _site -type f | sort
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
