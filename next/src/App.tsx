@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { rememberedEmail, supabase } from './lib/supabase'
-import { clearCache, deleteLog, deleteLogs, loadKain, logAgain, readCache, writeCache } from './lib/food'
+import { clearCache, deleteLog, deleteLogs, loadKain, logAgain, markRestDay, readCache, writeCache } from './lib/food'
 import { saveMeal } from './lib/capture'
 import { TabBar, type Tab } from './components/TabBar'
 import { Kain, type KainApi, type ToastAction } from './components/Kain'
@@ -83,6 +83,7 @@ function useLiveApi(session: Session | null | undefined): KainApi | null {
             writeCache: (d) => writeCache(userId, d),
             saveMeal,
             deleteLogs,
+            markRestDay,
           }
         : null,
     [userId],

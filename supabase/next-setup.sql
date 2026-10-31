@@ -34,3 +34,18 @@ create policy "meal-photos: owner write" on storage.objects
 drop policy if exists "meal-photos: owner delete" on storage.objects;
 create policy "meal-photos: owner delete" on storage.objects
   for delete using (bucket_id = 'meal-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------- Phase 4: rest or sick days that keep the streak ----------
+
+create table if not exists public.day_marks (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  date date not null,
+  kind text not null default 'rest',
+  created_at timestamptz not null default now(),
+  unique (user_id, date)
+);
+alter table public.day_marks enable row level security;
+drop policy if exists "day_marks: owner all" on public.day_marks;
+create policy "day_marks: owner all" on public.day_marks
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

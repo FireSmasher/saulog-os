@@ -694,3 +694,9 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - Rows written: same food_logs columns as the old app, notes start "saulog-next:" with the sources.
 - Checks: `npm test` 16 pass, `npm run build` pass, capture screen screenshot checked in dev with `?demo&capture=voice&said=...` (dev only).
 - HIS PASTES (morning): run next-setup.sql; deploy food-parse in the dashboard; paste ANTHROPIC_API_KEY into Edge Functions secrets.
+
+## UPDATE 2026-10-31 (rebuild phase 4 Rewards, Sevro, overnight run)
+- `next/src/lib/rewards.ts` (pure, 7 tests): streak, freezes, XP, levels and milestones are worked out again from his rows every load, so nothing extra is stored and nothing can drift. Rules: a day counts if it has a food row, a workout row or a marked rest day; one freeze per 7 days in a row, max 2, used by itself on a missed day; today never breaks until it is over. XP: each meal 10 + 1 per food (max 5), protein target hit +10, workout day +15, +50 at every 7 days, +150 at 30, +500 at 100, +2000 at 365. Level L costs 125 x L.
+- Data: one extra all-time query (date, time, protein only) for the day summaries, plus workout_logs dates and day_marks.
+- Screens (`next/src/components/Rewards.tsx`): "Lunch logged" sheet after a capture save (double ring, +XP, "Day N is safe", calories and protein bars, next meal with what still fits, Done, Undo), milestone screen at 7/30/100/365 (once each), streak sheet from the flame or Lv pill (best streak, freezes, level bar, "Rest or sick today? Keep the streak"). One-tap usual foods show the XP in the toast. Week dots show frozen days with a snowflake.
+- HIS PASTE: next-setup.sql now also makes `day_marks`. Until then rest days are kept on the phone only.

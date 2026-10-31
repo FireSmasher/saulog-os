@@ -96,17 +96,17 @@ export function streak(loggedDates: Set<string>, today: string): number {
   return n
 }
 
-export type WeekDot = { letter: string; date: string; isToday: boolean; state: 'done' | 'today' | 'missed' | 'future' }
+export type WeekDot = { letter: string; date: string; isToday: boolean; state: 'done' | 'frozen' | 'today' | 'missed' | 'future' }
 
 // Monday to Sunday of this week.
-export function week(loggedDates: Set<string>, today: string): WeekDot[] {
+export function week(loggedDates: Set<string>, today: string, frozen: Set<string> = new Set()): WeekDot[] {
   const [y, m, d] = today.split('-').map(Number)
   const weekday = (new Date(y, m - 1, d, 12).getDay() + 6) % 7 // Monday = 0
   const monday = addDays(today, -weekday)
   return 'MTWTFSS'.split('').map((letter, i) => {
     const date = addDays(monday, i)
     const state =
-      loggedDates.has(date) ? 'done' : date === today ? 'today' : date > today ? 'future' : 'missed'
+      loggedDates.has(date) ? 'done' : frozen.has(date) ? 'frozen' : date === today ? 'today' : date > today ? 'future' : 'missed'
     return { letter, date, isToday: date === today, state }
   })
 }

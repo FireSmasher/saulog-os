@@ -1,5 +1,6 @@
 import { supabase, loadTargets, type Targets } from './supabase'
-import { addDays, localTime, streak, type FoodLog } from './day'
+import { addDays, localTime, type FoodLog } from './day'
+import { summarise, type DaySummary } from './rewards'
 
 export const COLUMNS = 'id, date, time, name, grams, kcal, protein, carb, fat, is_restaurant, item_type, item_id'
 const PAGE = 1000 // Supabase returns at most 1,000 rows per request
@@ -40,41 +41,66 @@ async function loadHistory(today: string): Promise<FoodLog[]> {
   }
 }
 
-// Every logged day, newest first, only as far back as the streak needs.
-async function loadLoggedDates(today: string): Promise<string[]> {
-  const dates = new Set<string>()
+// Every day he ever logged, as a small summary (meals, foods, protein) for the streak
+// and XP. Only three short columns, paged 1,000 rows at a time.
+async function loadAllDays(today: string): Promise<DaySummary[]> {
+  const rows: { date: string; time: string; protein: number }[] = []
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase
       .from('food_logs')
-      .select('date')
+      .select('date, time, protein')
       .lte('date', today)
       .order('date', { ascending: false })
+      .order('id', { ascending: true })
       .range(from, from + PAGE - 1)
     if (error) throw error
-    const rows = data ?? []
-    for (const r of rows) dates.add(String(r.date))
-    if (rows.length < PAGE) break
-    const oldest = String(rows[rows.length - 1].date)
-    if (oldest < addDays(today, -(streak(dates, today) + 1))) break // the streak ends inside this page
+    for (const r of data ?? []) rows.push({ date: String(r.date), time: String(r.time).slice(0, 5), protein: Number(r.protein) })
+    if (!data || data.length < PAGE) break
   }
-  return [...dates]
+  return summarise(rows)
+}
+
+// Rest or sick days he marked. Table day_marks comes from supabase/next-setup.sql; until it
+// exists the marks live on this phone only.
+const LOCAL_REST = 'saulog-next-rest-days'
+const localRest = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_REST) || '[]') as string[]
+  } catch {
+    return []
+  }
+}
+
+async function loadRestDays(): Promise<string[]> {
+  const { data, error } = await supabase.from('day_marks').select('date').eq('kind', 'rest')
+  if (error) return localRest()
+  return [...new Set([...localRest(), ...(data ?? []).map((r) => String(r.date))])]
+}
+
+export async function markRestDay(date: string): Promise<void> {
+  localStorage.setItem(LOCAL_REST, JSON.stringify([...new Set([...localRest(), date])]))
+  await supabase.from('day_marks').upsert({ date, kind: 'rest' }, { onConflict: 'user_id,date' })
 }
 
 export type KainData = {
   today: string
   history: FoodLog[]
-  loggedDates: string[]
+  days: DaySummary[] // all time, for streak and XP
+  restDays: string[]
+  workoutDays: string[] // filled by Buhat (phase 5)
   targets: Targets | null
   savedAt: number
 }
 
 export async function loadKain(today: string): Promise<KainData> {
-  const [history, loggedDates, targets] = await Promise.all([
+  const [history, days, restDays, targets, workoutDays] = await Promise.all([
     loadHistory(today),
-    loadLoggedDates(today),
+    loadAllDays(today),
+    loadRestDays(),
     loadTargets(),
+    loadWorkoutDays(today),
   ])
-  return { today, history, loggedDates, targets, savedAt: Date.now() }
+  return { today, history, days, restDays, workoutDays, targets, savedAt: Date.now() }
 }
 
 // One tap on a usual food: a copy of that exact past row, logged now.
@@ -100,6 +126,18 @@ export async function logAgain(template: FoodLog, today: string): Promise<FoodLo
   return toLog(data)
 }
 
+// Days with at least one set logged (workout_logs, written by the old app and Buhat).
+async function loadWorkoutDays(today: string): Promise<string[]> {
+  const dates = new Set<string>()
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase.from('workout_logs').select('date').lte('date', today).order('date').range(from, from + PAGE - 1)
+    if (error) return [...dates]
+    for (const r of data ?? []) dates.add(String(r.date))
+    if (!data || data.length < PAGE) break
+  }
+  return [...dates]
+}
+
 export async function deleteLogs(ids: string[]): Promise<void> {
   const { error } = await supabase.from('food_logs').delete().in('id', ids)
   if (error) throw error
@@ -115,7 +153,8 @@ const cacheKey = (userId: string) => `saulog-next-kain:${userId}`
 
 export function readCache(userId: string): KainData | null {
   try {
-    return JSON.parse(localStorage.getItem(cacheKey(userId)) || 'null') as KainData | null
+    const d = JSON.parse(localStorage.getItem(cacheKey(userId)) || 'null') as KainData | null
+    return d && Array.isArray(d.days) && Array.isArray(d.workoutDays) ? d : null // older cache shape: reload
   } catch {
     return null
   }

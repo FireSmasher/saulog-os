@@ -5,6 +5,7 @@ import { addDays, localDate, localTime, type FoodLog } from './day'
 import type { KainApi } from '../components/Kain'
 import type { KainData } from './food'
 import { toRow } from './plate'
+import { summarise } from './rewards'
 
 const FOODS: Record<string, [number, number, number, number, number]> = {
   // name: grams, kcal, protein, carb, fat
@@ -39,7 +40,8 @@ function build(today: string): KainData {
     history.push(row(d, '19:40', 'Eggs, whole'), row(d, '21:00', 'Whey shake'))
   }
   history.push(row(today, '08:05', 'Oats, rolled'), row(today, '08:06', 'Skyr'))
-  return { today, history, loggedDates, targets: { kcal: 2000, protein: 160 }, savedAt: Date.now() }
+  void loggedDates
+  return { today, history, days: summarise(history), restDays: [], workoutDays: [], targets: { kcal: 2000, protein: 160 }, savedAt: Date.now() }
 }
 
 export const demoApi: KainApi = {
@@ -47,6 +49,7 @@ export const demoApi: KainApi = {
   logAgain: async (t, today) => ({ ...t, id: `demo-${n++}`, date: today, time: localTime() }),
   deleteLog: async () => {},
   deleteLogs: async () => {},
+  markRestDay: async () => {},
   saveMeal: async (items, date, time) =>
     items.map((i) => ({
       ...toRow(i, date, time), id: `demo-${n++}`, item_type: 'food', item_id: i.name,

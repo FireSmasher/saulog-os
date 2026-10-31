@@ -117,3 +117,12 @@ export function MinusIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function SnowIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />
+      <path d="M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5" />
+    </svg>
+  )
+}

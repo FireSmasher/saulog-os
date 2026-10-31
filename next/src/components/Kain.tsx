@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
+  addDays,
+  SLOTS,
+  slotOf,
   fmt,
   gramsLabel,
   habits,
@@ -8,7 +11,6 @@ import {
   meals,
   nextCard,
   percent,
-  streak,
   totals,
   usualFoods,
   week,
@@ -16,7 +18,9 @@ import {
   type Usual,
   type WeekDot,
 } from '../lib/day'
-import type { KainData } from '../lib/food'
+import { HISTORY_DAYS, type KainData } from '../lib/food'
+import { gain as gainOf, rewards as rewardsFrom, summarise, type Gain } from '../lib/rewards'
+import { JustLogged, Milestone, StreakSheet } from './Rewards'
 import type { saveMeal } from '../lib/capture'
 import { Capture, type CaptureMode } from './Capture'
 import {
@@ -38,7 +42,37 @@ export type KainApi = {
   writeCache: (data: KainData) => void
   saveMeal: typeof saveMeal
   deleteLogs: (ids: string[]) => Promise<void>
+  markRestDay: (date: string) => Promise<void>
 }
+
+// Streak and XP from all his days: the server summary for old days, his live rows for the
+// last six weeks (so a save or an Undo shows at once).
+function rewardsOf(d: KainData, today: string) {
+  const cutoff = addDays(d.today, -HISTORY_DAYS)
+  const days = [...d.days.filter((x) => x.date < cutoff), ...summarise(d.history)]
+  return rewardsFrom({
+    days,
+    workoutDays: new Set(d.workoutDays),
+    restDays: new Set(d.restDays),
+    today,
+    proteinTarget: d.targets?.protein ?? 0,
+  })
+}
+
+const SEEN = 'saulog-next-milestones'
+function firstTime(days: number, date: string): boolean {
+  const key = `${days}:${date}`
+  const seen = JSON.parse(localStorage.getItem(SEEN) || '[]') as string[]
+  if (seen.includes(key)) return false
+  localStorage.setItem(SEEN, JSON.stringify([...seen, key].slice(-20)))
+  return true
+}
+
+type Sheet =
+  | { kind: 'logged'; rows: FoodLog[]; gain: Gain }
+  | { kind: 'streak' }
+  | { kind: 'milestone'; days: number; freezeEarned: boolean }
+  | null
 
 export type ToastAction = { label: string; run: () => void }
 
@@ -105,6 +139,8 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
   const [data, setData] = useState<KainData | null>(() => api.readCache())
   const [error, setError] = useState('')
   const [now, setNow] = useState(() => new Date())
+  const [sheet, setSheet] = useState<Sheet>(null)
+  const [afterSheet, setAfterSheet] = useState<Sheet>(null)
   const [capture, setCapture] = useState<{ mode: CaptureMode; file?: File } | null>(() => {
     // Dev only: ?demo&capture=voice opens the capture screen for screenshots.
     const m = import.meta.env.DEV ? new URLSearchParams(location.search).get('capture') : null
@@ -125,29 +161,53 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
   // clicks a file input here and the capture screen opens with the photo in hand.
   const openCamera = () => cameraRef.current?.click()
 
+  function applyRows(rows: FoodLog[]): Gain | null {
+    if (!data) return null
+    const before = rewardsOf(data, today)
+    const next = { ...data, history: [...data.history, ...rows] }
+    const after = rewardsOf(next, today)
+    setData(next)
+    api.writeCache(next)
+    const g = gainOf(before, after)
+    if (g.milestone && firstTime(g.milestone, today)) setAfterSheet({ kind: 'milestone', days: g.milestone, freezeEarned: g.freezeEarned })
+    return g
+  }
+
   function logged(rows: FoodLog[]) {
     setCapture(null)
-    setData((d) => {
-      if (!d) return d
-      const next = { ...d, history: [...d.history, ...rows] }
-      api.writeCache(next)
-      return next
-    })
-    const kcal = rows.reduce((t, r) => t + r.kcal, 0)
-    onToast(`Logged ${rows.length} ${rows.length === 1 ? 'food' : 'foods'} · ${fmt(kcal)} kcal`, {
-      label: 'Undo',
-      run: async () => {
-        const ids = new Set(rows.map((r) => r.id))
-        setData((d) => d && { ...d, history: d.history.filter((l) => !ids.has(l.id)) })
-        try {
-          await api.deleteLogs([...ids])
-        } catch {
-          onToast('Could not undo. Check your connection.')
-          void refresh()
-        }
-      },
-    })
+    const g = applyRows(rows)
+    if (g) setSheet({ kind: 'logged', rows, gain: g })
   }
+
+  async function undoRows(rows: FoodLog[]) {
+    const ids = new Set(rows.map((r) => r.id))
+    setData((d) => d && { ...d, history: d.history.filter((l) => !ids.has(l.id)) })
+    setAfterSheet(null)
+    try {
+      await api.deleteLogs([...ids])
+    } catch {
+      onToast('Could not undo. Check your connection.')
+      void refresh()
+    }
+  }
+
+  function closeSheet() {
+    setSheet(afterSheet)
+    setAfterSheet(null)
+  }
+
+  async function restToday() {
+    setSheet(null)
+    setData((d) => d && { ...d, restDays: [...new Set([...d.restDays, today])] })
+    try {
+      await api.markRestDay(today)
+    } catch {
+      // kept on this phone
+    }
+    onToast('Rest day saved. Your streak is safe today.')
+  }
+
+
 
   const today = localDate(now)
 
@@ -184,6 +244,19 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
     }
   }, [refresh])
 
+  // Dev only: ?demo&sheet=logged|milestone|streak opens a reward screen for screenshots.
+  const devSheet = useRef(import.meta.env.DEV ? new URLSearchParams(location.search).get('sheet') : null)
+  useEffect(() => {
+    if (!devSheet.current || !data) return
+    const k = devSheet.current
+    devSheet.current = null
+    const rows = data.history.filter((l) => l.date === data.today)
+    const g: Gain = { xp: 15, levelUp: null, dayNowSafe: true, streak: 13, milestone: null, freezeEarned: false }
+    if (k === 'logged') setSheet({ kind: 'logged', rows, gain: g })
+    if (k === 'milestone') setSheet({ kind: 'milestone', days: 7, freezeEarned: true })
+    if (k === 'streak') setSheet({ kind: 'streak' })
+  }, [data])
+
   // A cached day from yesterday is not today's: refetch when the date moves on.
   useEffect(() => {
     if (data && data.today !== today) void refresh()
@@ -193,17 +266,21 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
     if (!data) return null
     const history = data.history
     const todayLogs = history.filter((l) => l.date === today)
-    const dates = new Set(data.loggedDates)
-    if (todayLogs.length) dates.add(today)
+    const r = rewardsOf(data, today)
+    const dates = new Set([...data.days.map((d) => d.date), ...data.restDays, ...data.workoutDays])
+    for (const l of history) dates.add(l.date)
+    if (!todayLogs.length && !data.restDays.includes(today) && !data.workoutDays.includes(today)) dates.delete(today)
     const hist = habits(history, today)
     const card = nextCard(todayLogs, hist, localTime(now))
     return {
       eaten: totals(todayLogs),
       meals: meals(todayLogs),
-      streak: streak(dates, today),
-      loggedToday: todayLogs.length > 0,
-      week: week(dates, today),
+      rewards: r,
+      streak: r.streak,
+      loggedToday: r.todayCounts,
+      week: week(dates, today, r.frozen),
       card,
+      hist,
       usual: usualFoods(history, card.slot, today),
     }
   }, [data, today, now])
@@ -216,13 +293,19 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
     setData((d) => d && { ...d, history: [...d.history, temp] })
     try {
       const saved = await api.logAgain(u.template, today)
+      const before = rewardsOf({ ...data }, today)
+      const next = { ...data, history: [...data.history, saved] }
+      const after = rewardsOf(next, today)
       setData((d) => {
         if (!d) return d
-        const next = { ...d, history: d.history.map((l) => (l.id === tempId ? saved : l)) }
-        api.writeCache(next)
-        return next
+        const n = { ...d, history: d.history.map((l) => (l.id === tempId ? saved : l)) }
+        api.writeCache(n)
+        return n
       })
-      onToast(`${u.name} logged, ${gramsLabel(u.grams)}`, {
+      const g = gainOf(before, after)
+      if (g.milestone && firstTime(g.milestone, today)) setSheet({ kind: 'milestone', days: g.milestone, freezeEarned: g.freezeEarned })
+      const extra = [g.xp ? `+${g.xp} XP` : '', g.dayNowSafe && g.streak ? `Day ${g.streak} is safe` : ''].filter(Boolean).join(' · ')
+      onToast(`${u.name} ${gramsLabel(u.grams)} logged${extra ? ' · ' + extra : ''}`, {
         label: 'Undo',
         run: async () => {
           setData((d) => d && { ...d, history: d.history.filter((l) => l.id !== saved.id) })
@@ -246,10 +329,19 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
         <p className="header-date">{todayLabel(now)}</p>
         <h1 className="header-title">Kain</h1>
       </div>
-      {view && view.streak > 0 && (
-        <div className="pill pill-reward" aria-label={`${view.streak} day streak`}>
-          <FlameIcon />
-          {view.streak}
+      {view && (
+        <div className="header-pills">
+          <button
+            className={view.streak > 0 ? 'pill pill-reward' : 'pill'}
+            aria-label={`${view.streak} day streak. Open streak`}
+            onClick={() => setSheet({ kind: 'streak' })}
+          >
+            <FlameIcon />
+            {view.streak}
+          </button>
+          <button className="pill" aria-label={`Level ${view.rewards.level.level}`} onClick={() => setSheet({ kind: 'streak' })}>
+            Lv {view.rewards.level.level}
+          </button>
         </div>
       )}
     </header>
@@ -412,6 +504,52 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
       )}
 
       {footer}
+
+      {sheet?.kind === 'logged' && (() => {
+        const rows = sheet.rows
+        const slot = slotOf(rows[0]?.time ?? localTime())
+        const label = SLOTS.find((x) => x.id === slot)!.label
+        const added = totals(rows)
+        const kLeft = (data.targets?.kcal ?? 0) - view.eaten.kcal
+        const pLeft = (data.targets?.protein ?? 0) - view.eaten.protein
+        const nh = view.hist.find((h) => h.id === view.card.slot)
+        let detail = ''
+        if (data.targets) {
+          if (kLeft <= 0) detail = 'You are at your calories for today.'
+          else {
+            const fits = view.usual
+              .filter((u) => u.template.kcal <= kLeft)
+              .sort((a, b) => b.template.protein - a.template.protein)
+              .slice(0, 2)
+            detail = `${fmt(kLeft)} kcal and ${fmt(Math.max(0, pLeft))} g protein left.`
+            if (fits.length && fits.reduce((t, u) => t + u.template.kcal, 0) <= kLeft)
+              detail += ` ${fits.map((u) => u.name.split(',')[0]).join(' + ')} fits.`
+          }
+        }
+        const nextLine = view.card.slot && nh ? { title: `Next: ${nh.label.toLowerCase()} around ${nh.usual}`, detail } : detail ? { title: 'Rest of today', detail } : null
+        return (
+          <JustLogged
+            title={`${label} logged`}
+            count={rows.length}
+            added={added}
+            eaten={view.eaten}
+            targets={data.targets}
+            gain={sheet.gain}
+            next={nextLine}
+            onDone={closeSheet}
+            onUndo={() => {
+              setSheet(null)
+              void undoRows(rows)
+            }}
+          />
+        )
+      })()}
+      {sheet?.kind === 'milestone' && (
+        <Milestone days={sheet.days} rewards={view.rewards} freezeEarned={sheet.freezeEarned} onDone={() => setSheet(null)} />
+      )}
+      {sheet?.kind === 'streak' && (
+        <StreakSheet rewards={view.rewards} canRest={!view.loggedToday} onRest={restToday} onClose={() => setSheet(null)} />
+      )}
 
       {capture && (
         <Capture
