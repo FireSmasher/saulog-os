@@ -226,11 +226,11 @@
 
   <div class="card" id="guideCard">
     <details id="guideDetails" open>
-      <summary><strong>Workout guide</strong> <span class="muted small">Nippard block, weeks 5 to 8, stop 1 rep short of failure</span></summary>
+      <summary><strong>Workout guide</strong> <span class="muted small">Nippard block 2, in order: Full Body, Upper, Lower. Stop 1 to 2 reps short of failure</span></summary>
       <div class="row" id="guideChips" style="gap:6px; margin:8px 0;">
-        <button type="button" class="ghost small" data-guide="Push">Push</button>
-        <button type="button" class="ghost small" data-guide="Pull">Pull</button>
-        <button type="button" class="ghost small" data-guide="Legs">Legs</button>
+        <button type="button" class="ghost small" data-guide="Full Body">Full Body</button>
+        <button type="button" class="ghost small" data-guide="Upper">Upper</button>
+        <button type="button" class="ghost small" data-guide="Lower">Lower</button>
       </div>
       <div id="guideBody"></div>
       <div class="muted small" style="margin-top:8px;">Tap an exercise to load it into the form below. Top of the rep range on every set, then add the smallest increment.</div>
@@ -253,6 +253,7 @@
   <form id="workoutForm" class="card">
     <label class="field">Split</label>
     <select id="wSplit">
+      <option>Full Body</option>
       <option>Push</option>
       <option>Pull</option>
       <option>Legs</option>

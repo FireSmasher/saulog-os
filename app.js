@@ -693,35 +693,36 @@ function renderTargets(totals) {
   }).join('');
 }
 
-// ---------- Workout guide (Nippard block, 10 Oct 2026) ----------
+// ---------- Workout guide (Nippard block 2, Full Body / Upper / Lower, from 2 Nov 2026) ----------
 // Source of truth is Nippard/02_TRAINING/CURRENT BLOCK.md. Update both together.
+// Run the three sessions in order and resume where you left off; never pick by preference.
 const WORKOUT_GUIDE = {
-  Push: [
+  'Full Body': [
+    { ex: 'Leg Press', sets: '3 x 8-10', cue: 'Legs first, every Full Body day' },
     { ex: 'Low-Incline DB Press', alt: ['DB Bench Press'], sets: '3 x 8-10', cue: 'Bench at 30 degrees' },
-    { ex: 'Seated DB Overhead Press', sets: '3 x 8-10', cue: '' },
-    { ex: 'Single-Arm Cable Lateral Raise', sets: '3 x 12-15 /side', cue: 'Second on Push day, stay strict' },
+    { ex: 'One-Arm Lat Pulldown', alt: ['One-Arm Lat Pulldown Machine'], sets: '3 x 10-12 /side', cue: '' },
     { ex: 'Cable Fly', sets: '2 x 12-15', cue: 'The stretch is the working half' },
-    { ex: 'Machine Pec Flys', sets: '2 x 10-12', cue: '' },
-    { ex: 'Overhead Cable Tricep Extension', alt: ['Tricep Extension'], sets: '3 x 10-12', cue: 'Keep it overhead' }
+    { ex: 'Seated Leg Curl', sets: '2 x 12-15', cue: 'Seated, never lying' },
+    { ex: 'Single-Arm Cable Lateral Raise', sets: '2 x 12-15 /side', cue: 'Stay strict' }
   ],
-  Pull: [
-    { ex: 'One-Arm Lat Pulldown', sets: '3 x 10-12 /side', cue: '' },
-    { ex: 'Lever Row', sets: '3 x 8-10', cue: 'Own 8 clean reps per set, no grinding' },
+  Upper: [
+    { ex: 'Barbell Bench Press', sets: '3 x 8', cue: '40 kg, 2 reps short of failure, stop at any back pain' },
+    { ex: 'Seated DB Overhead Press', sets: '3 x 8-10', cue: '' },
     { ex: 'Seated Cable Row', alt: ['Seated Pulley'], sets: '3 x 10-12', cue: '' },
-    { ex: 'Face Pulls', sets: '3 x 15', cue: '' },
-    { ex: 'Cross-Body Hammer Curls', sets: '3 x 10-12', cue: '' },
-    { ex: 'Cable Curl', alt: ['Cable curls'], sets: '2 x 10-12', cue: 'Or EZ Preacher Curl, pick one' },
-    { ex: 'Superman Holds', sets: '3 x 15', cue: 'Add hold time' }
+    { ex: 'T-bar row', alt: ['Lever Row'], sets: '2 x 8-10', cue: '40 kg, own 8 clean reps, no grinding' },
+    { ex: 'Single-Arm Cable Lateral Raise', sets: '2 x 12-15 /side', cue: 'Stay strict' },
+    { ex: 'Overhead Cable Tricep Extension', alt: ['Tricep Extension'], sets: '2 x 10-12', cue: 'Keep it overhead' },
+    { ex: 'Cable Curl', alt: ['Cable curls'], sets: '2 x 10-12', cue: '' }
   ],
-  Legs: [
-    { ex: 'Leg Press', sets: '3 x 8-10', cue: '' },
+  Lower: [
+    { ex: 'Leg Press', sets: '3 x 10-12', cue: '' },
     { ex: 'Leg Extension', sets: '3 x 12-15', cue: 'Recline the seat, lean back' },
     { ex: 'Seated Leg Curl', sets: '3 x 12-15', cue: 'Seated, never lying' },
     { ex: 'Standing Calf Raise', sets: '3 x 15-20', cue: 'Pause at the bottom' },
     { ex: 'Hip Abduction', alt: ['Abduction'], sets: '2 x 12-15', cue: '' }
   ]
 };
-let guideSplit = 'Push';
+let guideSplit = 'Full Body';
 
 async function renderGuide() {
   const body = $('#guideBody');
