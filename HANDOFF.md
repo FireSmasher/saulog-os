@@ -596,3 +596,25 @@ gate). `~/.saulog-os-service.json` (local, untracked, Edwin-created-only) holds
       see and click the Mac screen). But iPhone Mirroring itself refuses with
       "not available in your country or region", Apple doesn't ship it in
       the EU. There is no path from this Mac to that phone's screen.
+
+## UPDATE 2026-10-23 (overhaul 21 to 23 Oct, Sevro)
+
+- App code: nothing changed. No app file was added, moved or taken out.
+- 21 Oct: this file got its long dashes swapped for plain marks (commit a2ce515). GitHub already has it.
+- The copy of this file from before that swap sits in `Documents/Archives/2026-10-22-filing-backups.nosync/Saulog-OS` (2 move records, waves c3-5 and c3-5b, in `Agents/filing-audit/moves`).
+- Folder: still `food-tracker-app.nosync`, with the `food-tracker-app` link beside it. Nothing changed there.
+- Check on 23 Oct: `node --check app.js` passed. Nobody started the local server or opened the page, so the look in a browser is still to do.
+- Git: 27 files tracked, none under `quarters/`. Your 3 waiting changes from September (`.gitignore`, `.claude/`, `scripts/quarters-fix.py`) were not touched.
+- Quarters 1 to 4 Sep archive: still in `Documents/Archives/quarters-2026-09-01-to-04`, 26 files, none changed since 4 Sep.
+- The jobs list (`Agents/jobs_registry.json`) now has a Saulog OS row: the live page link, this file, the check above, no timed jobs.
+- ~~This repo is public, and agents are blocked from pushing to it. Any push is yours.~~ **Overruled by Edwin 31 Oct 2026: always push.** Agents commit and push their own Saulog OS changes without asking (a push to `main` deploys). Commit only the files you changed; never sweep in his pending ones.
+- This block is not committed. A backup, `HANDOFF.md.bak-20261023-step6`, sits beside this file and git shows it as new: leave it out of git.
+- Left for you: the browser look. (This block was committed and pushed 31 Oct 2026 under the always-push ruling.)
+
+## UPDATE 2026-10-31 (Nippard session)
+
+- **Push rule: always push** (Edwin, 31 Oct 2026). Supersedes the 23 Oct line above.
+- Buhat workout guide is now Nippard block 2, Full Body / Upper / Lower from 2 Nov; barbell bench back on Upper at 40 kg;
+  "Full Body" added to the split menu (Push/Pull/Legs kept for old entries); cache v22. Commit ab65b18, pushed.
+  Source of truth: `Nippard/02_TRAINING/CURRENT BLOCK.md`, block 2 section. Served locally on 8799 and the new guide
+  loaded; the look on his phone is still his.
