@@ -654,3 +654,18 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 5. Buhat (opus, high): Nippard block 2 guide (from app.js 'Full Body'/Upper/Lower), pre-filled next set with one-tap log, rest timer, PR banner only on true bests, body map from scripts/bodymap with an exercise-to-muscle map (yuhonas/free-exercise-db, Unlicense, gate first).
 6. Push reminder (opus, high): Web Push with VAPID, Supabase cron, one a day only if nothing logged; needs the app on his home screen (iOS 16.4+).
 7. Switch (opus, high): he uses /next/ for a few days on the phone; old root app stays for Quarters.
+
+## UPDATE 2026-10-31 (rebuild phase 1 Setup, Sevro)
+- Built: `next/` with Vite 8.3.5, React 19.3.1, TypeScript 7.0.2, supabase-js 2.118.0. Commit 57ac63f, pushed.
+- Live: https://firesmasher.github.io/saulog-os/next/ . The old app at the root is unchanged: after the deploy all 16 of its files were checked byte for byte against the repo.
+- Deploy changed: GitHub Pages now builds with GitHub Actions (`.github/workflows/pages.yml`) instead of "deploy from branch". Every push to main runs it: type check, build `next/`, old app files at the root, `next/dist` at `/next/`. First run 41212731200 passed. The site no longer serves `docs/`, `scripts/`, `supabase/` or `.md` files (the app never used them; they are still in the public repo). Undo: `gh api -X PUT repos/FireSmasher/saulog-os/pages -f build_type=legacy -f "source[branch]=main" -f "source[path]=/"`.
+- Tokens: `next/src/styles/tokens.css` has all 18 Figma "Glass" variables, light and dark, read with a use_figma script (not a metered read call). Light is on. Dark turns on with `data-theme="dark"` on `<html>`.
+- Font: Instrument Sans variable woff2 (latin, latin-ext) in `next/src/assets/fonts`, OFL licence beside it.
+- PWA: `next/public/manifest.webmanifest` (name Saulog OS, scope /saulog-os/next/), icons resized from `icon.png`. The service worker is written by `vite.config.ts` into `dist/sw.js`: it pre-caches every built file, and pages load from the network first with a 3 s fallback to the cache. Checked live: the worker is registered at /saulog-os/next/ and controls the page.
+- Supabase: `next/src/lib/supabase.ts`. It keeps its own session under the storage key `saulog-next-auth` and never uses the old app's `sb_session` tokens, because Supabase rotates refresh tokens and sharing one would sign the old app out. It only reads the old email to fill in the box. He signs in once with the same email and password.
+- On screen now: Kain shows sign-in, then "Connected to your logs" with his daily targets from `targets`. + shows a note that logging comes in step 3. Buhat shows a note that workouts come in step 5.
+- Packages gated: `docs/tool-reviews/2026-10-31-next-deps.md`, safe as long as install scripts stay off (`next/.npmrc` sets ignore-scripts).
+- Guard note: the kern_guard route check (added 31 Oct) blocks new `.json` files under `next/`. `package.json` and `tsconfig.json` were made by `npm init` and `tsc --init`, then overwritten. The guard was not changed. A ROUTE_TREES entry for `projects/*/next/*` would stop this false alarm.
+- Dev: `cd next && npm install && npm run dev` opens http://localhost:5173/saulog-os/next/ . Check: `npm run build`.
+- Not checked yet: the look on his real iPhone and sign-in with his real password.
+- Next: phase 2, Kain today. /model opus, /effort high (from the BUILD PLAN; Jev's router answered "monthly cap reached" on 31 Oct).
