@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   addDays,
   SLOTS,
@@ -22,7 +22,10 @@ import { HISTORY_DAYS, type KainData } from '../lib/food'
 import { gain as gainOf, rewards as rewardsFrom, summarise, type Gain } from '../lib/rewards'
 import { JustLogged, Milestone, StreakSheet } from './Rewards'
 import type { saveMeal } from '../lib/capture'
-import { Capture, type CaptureMode } from './Capture'
+import type { CaptureMode } from './Capture'
+// The capture screen (photo, voice, scanner, search) loads on first use; the service worker
+// precaches it, so it opens offline too.
+const Capture = lazy(() => import('./Capture').then((m) => ({ default: m.Capture })))
 import {
   BarcodeIcon,
   CameraIcon,
@@ -553,6 +556,7 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
       )}
 
       {capture && (
+        <Suspense fallback={<div className="capture-wait" />}>
         <Capture
           mode={capture.mode}
           initialFile={capture.file}
@@ -561,6 +565,7 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
           onClose={() => setCapture(null)}
           onLogged={logged}
         />
+        </Suspense>
       )}
     </>
   )

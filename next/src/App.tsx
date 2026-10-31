@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { rememberedEmail, supabase } from './lib/supabase'
 import { clearCache, deleteLog, deleteLogs, loadKain, logAgain, markRestDay, readCache, writeCache } from './lib/food'
 import { saveMeal } from './lib/capture'
 import { TabBar, type Tab } from './components/TabBar'
 import { Kain, type KainApi, type ToastAction } from './components/Kain'
-import { Buhat, type BuhatApi } from './components/Buhat'
+import type { BuhatApi } from './components/Buhat'
+// Buhat (and its body map) loads when the tab is first opened.
+const Buhat = lazy(() => import('./components/Buhat').then((m) => ({ default: m.Buhat })))
 import { Reminder } from './components/Reminder'
 import { loadWorkouts, readWorkoutCache, removeLastSet, saveSet, writeWorkoutCache } from './lib/workouts'
 
@@ -192,7 +194,9 @@ export default function App() {
           )
         ) : (
           buhatApi ? (
-            <Buhat key={DEMO ? 'demo' : session?.user.id} api={buhatApi} onToast={showToast} />
+            <Suspense fallback={<Header title="Buhat" />}>
+              <Buhat key={DEMO ? 'demo' : session?.user.id} api={buhatApi} onToast={showToast} />
+            </Suspense>
           ) : (
             <>
               <Header title="Buhat" />
