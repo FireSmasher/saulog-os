@@ -1,15 +1,19 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { loadTargets, rememberedEmail, supabase, type Targets } from './lib/supabase'
+import { rememberedEmail, supabase } from './lib/supabase'
+import { clearCache, deleteLog, loadKain, logAgain, readCache, writeCache } from './lib/food'
 import { TabBar, type Tab } from './components/TabBar'
+import { Kain, type KainApi, type ToastAction } from './components/Kain'
+
+// Dev only: http://localhost:5173/saulog-os/next/?demo shows made-up data, no sign-in.
+// import.meta.env.DEV is false in the build, so this branch and lib/demo.ts are dropped.
+const DEMO = import.meta.env.DEV && new URLSearchParams(location.search).has('demo')
 
 function todayLabel(date = new Date()): string {
   const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' })
   const dayMonth = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   return `${weekday}, ${dayMonth}`
 }
-
-const fmt = (n: number) => Math.round(n).toLocaleString('en-GB')
 
 function Header({ title }: { title: string }) {
   return (
@@ -65,84 +69,87 @@ function SignIn() {
   )
 }
 
-function Connected({ session }: { session: Session }) {
-  const [targets, setTargets] = useState<Targets | null | undefined>(undefined)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let live = true
-    loadTargets()
-      .then((t) => live && setTargets(t))
-      .catch((e: Error) => live && setError(e.message))
-    return () => {
-      live = false
-    }
-  }, [session.user.id])
-
-  return (
-    <section className="glass card" aria-label="Sync">
-      <div className="row">
-        <span className={error ? 'status-dot off' : 'status-dot'} />
-        <span style={{ font: 'var(--t-label)' }}>
-          {error ? 'Could not reach your data' : 'Connected to your logs'}
-        </span>
-      </div>
-      {error && <p className="small muted" style={{ margin: 0 }}>{error}</p>}
-      {targets === undefined && !error && <p className="small muted" style={{ margin: 0 }}>Loading your targets</p>}
-      {targets === null && <p className="small muted" style={{ margin: 0 }}>No daily targets saved yet.</p>}
-      {targets && (
-        <div className="split">
-          <div>
-            <div className="small muted">Calories a day</div>
-            <div className="number">{fmt(targets.kcal)}</div>
-          </div>
-          <div>
-            <div className="small muted">Protein a day</div>
-            <div className="number">{fmt(targets.protein)} g</div>
-          </div>
-        </div>
-      )}
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <span className="small muted">{session.user.email}</span>
-        <button className="link-btn" onClick={() => supabase.auth.signOut()}>
-          Sign out
-        </button>
-      </div>
-    </section>
+function useLiveApi(session: Session | null | undefined): KainApi | null {
+  const userId = session?.user.id
+  return useMemo(
+    () =>
+      userId
+        ? {
+            load: loadKain,
+            logAgain,
+            deleteLog,
+            readCache: () => readCache(userId),
+            writeCache: (d) => writeCache(userId, d),
+          }
+        : null,
+    [userId],
   )
 }
+
+type Toast = { text: string; action?: ToastAction }
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('kain')
   const [session, setSession] = useState<Session | null | undefined>(undefined)
-  const [toast, setToast] = useState('')
+  const [demoApi, setDemoApi] = useState<KainApi | null>(null)
+  const [toast, setToast] = useState<Toast | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
+  const liveApi = useLiveApi(session)
 
   useEffect(() => {
+    if (DEMO) {
+      void import('./lib/demo').then((m) => setDemoApi(m.demoApi))
+      return
+    }
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next))
     return () => data.subscription.unsubscribe()
   }, [])
 
-  function showToast(text: string) {
-    setToast(text)
+  function showToast(text: string, action?: ToastAction) {
+    setToast({ text, action })
     window.clearTimeout(toastTimer.current)
-    toastTimer.current = window.setTimeout(() => setToast(''), 2200)
+    toastTimer.current = window.setTimeout(() => setToast(null), action ? 4500 : 2600)
   }
+
+  const comingSoon = () => showToast('Photo, voice and barcode logging come in step 3. Tap a usual food to log it now.')
+
+  async function signOut() {
+    if (session) clearCache(session.user.id)
+    await supabase.auth.signOut()
+  }
+
+  const api = DEMO ? demoApi : liveApi
 
   return (
     <>
       <main className="screen">
         {tab === 'kain' ? (
-          <>
-            <Header title="Kain" />
-            {session === undefined && <section className="glass card small muted">Checking sign-in</section>}
-            {session === null && <SignIn />}
-            {session && <Connected session={session} />}
-            <p className="small muted" style={{ margin: '4px 2px 0' }}>
-              New Saulog OS, step 1 of 7. Your meals for today show here next.
-            </p>
-          </>
+          api ? (
+            <Kain
+              key={DEMO ? 'demo' : session?.user.id}
+              api={api}
+              onToast={showToast}
+              onCapture={comingSoon}
+              footer={
+                !DEMO &&
+                session && (
+                  <div className="footer-line small muted">
+                    <span>{session.user.email}</span>
+                    <button className="link-btn" onClick={signOut}>
+                      Sign out
+                    </button>
+                  </div>
+                )
+              }
+            />
+          ) : (
+            <>
+              <Header title="Kain" />
+              {session === undefined && <section className="glass card small muted">Checking sign-in</section>}
+              {session === null && <SignIn />}
+            </>
+          )
         ) : (
           <>
             <Header title="Buhat" />
@@ -157,10 +164,21 @@ export default function App() {
       </main>
       {toast && (
         <div className="glass toast" role="status">
-          {toast}
+          <span>{toast.text}</span>
+          {toast.action && (
+            <button
+              className="toast-action"
+              onClick={() => {
+                toast.action!.run()
+                setToast(null)
+              }}
+            >
+              {toast.action.label}
+            </button>
+          )}
         </div>
       )}
-      <TabBar tab={tab} onTab={setTab} onPlus={() => showToast('Photo, voice and barcode logging come in step 3.')} />
+      <TabBar tab={tab} onTab={setTab} onPlus={comingSoon} />
     </>
   )
 }

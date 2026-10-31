@@ -669,3 +669,17 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - Dev: `cd next && npm install && npm run dev` opens http://localhost:5173/saulog-os/next/ . Check: `npm run build`.
 - Not checked yet: the look on his real iPhone and sign-in with his real password.
 - Next: phase 2, Kain today. /model opus, /effort high (from the BUILD PLAN; Jev's router answered "monthly cap reached" on 31 Oct).
+
+## UPDATE 2026-10-31 (rebuild phase 2 Kain today, Sevro)
+- Built to Figma frame 13:105 ("01 Kain today", page "v2 · Glass (research applied)"), read with one use_figma script.
+- On screen with real data: today's calories and protein rings against `targets`, next-meal card, week dots Monday to Sunday, streak pill and "N days in a row", usual-foods chips, meal list (Breakfast, Lunch, Dinner).
+- Meals: food_logs has no meal column, so the meal comes from the logged time: breakfast 04:00 to 10:59, lunch 11:00 to 15:59, dinner 16:00 to 03:59.
+- Next-meal card: names the current meal if not logged yet, else the next one; with 7+ days of history a meal logged on fewer than 3 past days is skipped; after dinner it says "Log a snack". "Usually around" is the median time of his first entry for that meal over 42 days (default 08:00, 13:00, 19:30 until 3 days of data).
+- Streak: any day with one food row counts; an unlogged today does not break it until midnight.
+- Usual chips: foods logged on 2+ days in this meal over 42 days, most-used grams. ONE TAP LOGS: it inserts a copy of that exact past row into food_logs at the current time, the row shows at once, a toast offers Undo (deletes it).
+- Not yet working on purpose (toast says step 3): the next-meal card, + button, Say it, Scan, Search. Level pill (Lv) left out until step 4 (XP).
+- Last good load is kept in localStorage (`saulog-next-kain:<user id>`) so the screen shows instantly; it refreshes on open, on coming back to the app, and when the date changes. Sign out clears it.
+- Files: `next/src/lib/day.ts` (pure logic), `next/src/lib/food.ts` (Supabase reads, insert, delete, cache), `next/src/components/Kain.tsx`, icons, styles; `next/src/lib/demo.ts` is dev only (`npm run dev`, add `?demo`), dropped from the build (checked: no demo rows in dist).
+- Checks: `cd next && npm test` (10 logic tests, Berlin time zone, includes the 25 Oct clock change) and `npm run build`. Both passed 31 Oct.
+- Watch: the OLD app never reads Supabase (it pushes only, from its own phone storage). So meals tapped in the new app do not show in the old app, and any old-app meal that failed to sync is missing from the new app. Read totals in the new app. The old app also dates rows by UTC (`toISOString`), so a meal logged between 00:00 and 01:00 Berlin lands on the day before.
+- Next: phase 3, Log a meal. /model opus, /effort high.
