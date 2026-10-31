@@ -1,6 +1,8 @@
 import { supabase, loadTargets, type Targets } from './supabase'
 import { addDays, localTime, type FoodLog } from './day'
 import { summarise, type DaySummary } from './rewards'
+import { loadWorkouts } from './workouts'
+import { bestCount } from './buhat'
 
 export const COLUMNS = 'id, date, time, name, grams, kcal, protein, carb, fat, is_restaurant, item_type, item_id'
 const PAGE = 1000 // Supabase returns at most 1,000 rows per request
@@ -87,20 +89,21 @@ export type KainData = {
   history: FoodLog[]
   days: DaySummary[] // all time, for streak and XP
   restDays: string[]
-  workoutDays: string[] // filled by Buhat (phase 5)
+  workoutDays: string[]
+  workoutBests: number // best sets ever, +25 XP each
   targets: Targets | null
   savedAt: number
 }
 
 export async function loadKain(today: string): Promise<KainData> {
-  const [history, days, restDays, targets, workoutDays] = await Promise.all([
+  const [history, days, restDays, targets, workouts] = await Promise.all([
     loadHistory(today),
     loadAllDays(today),
     loadRestDays(),
     loadTargets(),
-    loadWorkoutDays(today),
+    loadWorkoutSummary(),
   ])
-  return { today, history, days, restDays, workoutDays, targets, savedAt: Date.now() }
+  return { today, history, days, restDays, workoutDays: workouts.days, workoutBests: workouts.bests, targets, savedAt: Date.now() }
 }
 
 // One tap on a usual food: a copy of that exact past row, logged now.
@@ -126,16 +129,14 @@ export async function logAgain(template: FoodLog, today: string): Promise<FoodLo
   return toLog(data)
 }
 
-// Days with at least one set logged (workout_logs, written by the old app and Buhat).
-async function loadWorkoutDays(today: string): Promise<string[]> {
-  const dates = new Set<string>()
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase.from('workout_logs').select('date').lte('date', today).order('date').range(from, from + PAGE - 1)
-    if (error) return [...dates]
-    for (const r of data ?? []) dates.add(String(r.date))
-    if (!data || data.length < PAGE) break
+// Workout days and best sets, from every strength row (old app and Buhat).
+async function loadWorkoutSummary(): Promise<{ days: string[]; bests: number }> {
+  try {
+    const rows = await loadWorkouts()
+    return { days: [...new Set(rows.filter((r) => r.sets.length).map((r) => r.date))], bests: bestCount(rows) }
+  } catch {
+    return { days: [], bests: 0 }
   }
-  return [...dates]
 }
 
 export async function deleteLogs(ids: string[]): Promise<void> {
@@ -154,7 +155,7 @@ const cacheKey = (userId: string) => `saulog-next-kain:${userId}`
 export function readCache(userId: string): KainData | null {
   try {
     const d = JSON.parse(localStorage.getItem(cacheKey(userId)) || 'null') as KainData | null
-    return d && Array.isArray(d.days) && Array.isArray(d.workoutDays) ? d : null // older cache shape: reload
+    return d && Array.isArray(d.days) && Array.isArray(d.workoutDays) && typeof d.workoutBests === 'number' ? d : null // older cache shape: reload
   } catch {
     return null
   }

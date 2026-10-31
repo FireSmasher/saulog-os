@@ -75,6 +75,7 @@ export type Rewards = {
 }
 
 type Input = {
+  extraXp?: number // +25 per best set in Buhat
   days: DaySummary[]
   workoutDays?: Set<string>
   restDays?: Set<string>
@@ -82,7 +83,7 @@ type Input = {
   proteinTarget: number
 }
 
-export function rewards({ days, workoutDays = new Set(), restDays = new Set(), today, proteinTarget }: Input): Rewards {
+export function rewards({ days, workoutDays = new Set(), restDays = new Set(), today, proteinTarget, extraXp = 0 }: Input): Rewards {
   const byDate = new Map(days.map((d) => [d.date, d]))
   const counted = (date: string) => byDate.has(date) || workoutDays.has(date) || restDays.has(date)
   const allDates = [...byDate.keys(), ...workoutDays, ...restDays].filter((d) => d <= today).sort()
@@ -110,6 +111,7 @@ export function rewards({ days, workoutDays = new Set(), restDays = new Set(), t
       streak = 0
     }
   }
+  xp += extraXp
   return { streak, best, freezes, frozen, xp, level: levelFor(xp), todayCounts: counted(today) }
 }
 

@@ -41,7 +41,7 @@ function build(today: string): KainData {
   }
   history.push(row(today, '08:05', 'Oats, rolled'), row(today, '08:06', 'Skyr'))
   void loggedDates
-  return { today, history, days: summarise(history), restDays: [], workoutDays: [], targets: { kcal: 2000, protein: 160 }, savedAt: Date.now() }
+  return { today, history, days: summarise(history), restDays: [], workoutDays: [], workoutBests: 0, targets: { kcal: 2000, protein: 160 }, savedAt: Date.now() }
 }
 
 export const demoApi: KainApi = {
@@ -56,4 +56,37 @@ export const demoApi: KainApi = {
     })),
   readCache: () => null,
   writeCache: () => {},
+}
+
+// Buhat demo: Full Body two days ago, Upper yesterday, so today is Lower with history.
+import type { BuhatApi } from '../components/Buhat'
+import type { WorkoutRow } from './buhat'
+
+let w = 0
+const wrow = (date: string, split: string, exercise: string, sets: [number, number][]): WorkoutRow => ({
+  id: `w${w++}`, date, time: '18:00', split, exercise, sets: sets.map(([weight, reps]) => ({ weight, reps })),
+})
+function buhatRows(): WorkoutRow[] {
+  const t = localDate()
+  return [
+    wrow(addDays(t, -5), 'Lower', 'Leg Press', [[90, 12], [90, 12], [90, 12]]),
+    wrow(addDays(t, -5), 'Lower', 'Leg Extension', [[45, 15], [45, 14], [45, 13]]),
+    wrow(addDays(t, -2), 'Full Body', 'Leg Press', [[80, 10], [80, 10], [80, 9]]),
+    wrow(addDays(t, -1), 'Upper', 'Barbell Bench Press', [[40, 8], [40, 8], [40, 8]]),
+    wrow(t, 'Lower', 'Leg Press', [[95, 10]]),
+  ]
+}
+let demoRows: WorkoutRow[] | null = null
+export const demoBuhat: BuhatApi = {
+  load: async () => (demoRows ??= buhatRows()),
+  saveSet: async (row, split, exercise, set, date) => {
+    const r = row ? { ...row, sets: [...row.sets, set] } : wrow(date, split, exercise, [[set.weight, set.reps]])
+    demoRows = row ? demoRows!.map((x) => (x.id === r.id ? r : x)) : [...demoRows!, r]
+    return r
+  },
+  removeLastSet: async (row) => (row.sets.length > 1 ? { ...row, sets: row.sets.slice(0, -1) } : null),
+  readCache: () => null,
+  writeCache: () => {},
+  readKain: () => null,
+  writeKain: () => {},
 }

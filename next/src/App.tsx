@@ -5,6 +5,8 @@ import { clearCache, deleteLog, deleteLogs, loadKain, logAgain, markRestDay, rea
 import { saveMeal } from './lib/capture'
 import { TabBar, type Tab } from './components/TabBar'
 import { Kain, type KainApi, type ToastAction } from './components/Kain'
+import { Buhat, type BuhatApi } from './components/Buhat'
+import { loadWorkouts, readWorkoutCache, removeLastSet, saveSet, writeWorkoutCache } from './lib/workouts'
 
 // Dev only: http://localhost:5173/saulog-os/next/?demo shows made-up data, no sign-in.
 // import.meta.env.DEV is false in the build, so this branch and lib/demo.ts are dropped.
@@ -90,20 +92,45 @@ function useLiveApi(session: Session | null | undefined): KainApi | null {
   )
 }
 
+function useBuhatApi(session: Session | null | undefined): BuhatApi | null {
+  const userId = session?.user.id
+  return useMemo(
+    () =>
+      userId
+        ? {
+            load: loadWorkouts,
+            saveSet,
+            removeLastSet,
+            readCache: () => readWorkoutCache(userId),
+            writeCache: (rows) => writeWorkoutCache(userId, rows),
+            readKain: () => readCache(userId),
+            writeKain: (d) => writeCache(userId, d),
+          }
+        : null,
+    [userId],
+  )
+}
+
 type Toast = { text: string; action?: ToastAction }
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('kain')
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [demoApi, setDemoApi] = useState<KainApi | null>(null)
+  const [demoBuhat, setDemoBuhat] = useState<BuhatApi | null>(null)
   const [toast, setToast] = useState<Toast | null>(null)
   const [plusSignal, setPlusSignal] = useState(0)
   const toastTimer = useRef<number | undefined>(undefined)
   const liveApi = useLiveApi(session)
+  const liveBuhat = useBuhatApi(session)
 
   useEffect(() => {
     if (DEMO) {
-      void import('./lib/demo').then((m) => setDemoApi(m.demoApi))
+      void import('./lib/demo').then((m) => {
+        setDemoApi(m.demoApi)
+        setDemoBuhat(m.demoBuhat)
+        if (new URLSearchParams(location.search).get('tab') === 'buhat') setTab('buhat')
+      })
       return
     }
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -128,6 +155,7 @@ export default function App() {
   }
 
   const api = DEMO ? demoApi : liveApi
+  const buhatApi = DEMO ? demoBuhat : liveBuhat
 
   return (
     <>
@@ -159,15 +187,15 @@ export default function App() {
             </>
           )
         ) : (
-          <>
-            <Header title="Buhat" />
-            <section className="glass card">
-              <h2 className="card-title">Workouts come in step 5</h2>
-              <p className="small muted" style={{ margin: 0 }}>
-                Keep logging sets in the old app until then.
-              </p>
-            </section>
-          </>
+          buhatApi ? (
+            <Buhat key={DEMO ? 'demo' : session?.user.id} api={buhatApi} onToast={showToast} />
+          ) : (
+            <>
+              <Header title="Buhat" />
+              {session === undefined && <section className="glass card small muted">Checking sign-in</section>}
+              {session === null && <SignIn />}
+            </>
+          )
         )}
       </main>
       {toast && (

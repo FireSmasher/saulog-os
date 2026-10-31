@@ -126,3 +126,13 @@ export function SnowIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function MedalIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8 3l2.5 6M16 3l-2.5 6" />
+      <circle cx="12" cy="15" r="5.5" />
+      <path d="M12 12.4l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 14.5l2-.3Z" />
+    </svg>
+  )
+}

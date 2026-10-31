@@ -47,7 +47,7 @@ export type KainApi = {
 
 // Streak and XP from all his days: the server summary for old days, his live rows for the
 // last six weeks (so a save or an Undo shows at once).
-function rewardsOf(d: KainData, today: string) {
+export function rewardsOf(d: KainData, today: string) {
   const cutoff = addDays(d.today, -HISTORY_DAYS)
   const days = [...d.days.filter((x) => x.date < cutoff), ...summarise(d.history)]
   return rewardsFrom({
@@ -56,6 +56,7 @@ function rewardsOf(d: KainData, today: string) {
     restDays: new Set(d.restDays),
     today,
     proteinTarget: d.targets?.protein ?? 0,
+    extraXp: 25 * (d.workoutBests ?? 0),
   })
 }
 
