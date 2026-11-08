@@ -181,6 +181,11 @@ export default function App() {
                       Sign out
                     </button>
                   </div>
+                  <div className="footer-line small muted">
+                    <a className="link-btn" href="../?old=1">
+                      Quarters and old app
+                    </a>
+                  </div>
                   </>
                 )
               }

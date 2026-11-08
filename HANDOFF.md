@@ -749,3 +749,7 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
   button against live data, push on a real iPhone. All need his phone or his paste.
 - Next session: `/model opus`, `/effort high`. Prompt: "Saulog OS: read HANDOFF.md tail, I ran
   the morning paste, check food-parse and push-daily logs and fix what broke."
+
+## UPDATE 2026-11-08 (Sevro)
+- Buhat guide = Nippard block 2b (45 min cap): Upper drops Seated DB Overhead Press and T-bar Row; pairs A/B in cues. Both apps (app.js, next/src/lib/buhat.ts). Source: Nippard/02_TRAINING/CURRENT BLOCK.md "BLOCK 2b".
+- Edwin: "when I open up saulog os, it should open up to the new version". Root index.html now redirects to next/ at once. Old app (Quarters, "Send N unsent logs") at ?old=1, remembered for that tab. New app Kain footer has a "Quarters and old app" link. sw.js v24.

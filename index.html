@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+// 8 Nov 2026, Edwin: "when I open up saulog os, it should open up to the new version".
+// Root goes to /next/. The old app (Quarters, "Send unsent logs") stays at ?old=1 for this tab.
+try {
+  if (/[?&]old=1/.test(location.search)) sessionStorage.setItem('saulogOld', '1');
+  if (!sessionStorage.getItem('saulogOld')) location.replace('next/');
+} catch (e) { if (!/[?&]old=1/.test(location.search)) location.replace('next/'); }
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Saulog OS</title>
 <link rel="manifest" href="./manifest.json">
@@ -230,7 +238,7 @@
 
   <div class="card" id="guideCard">
     <details id="guideDetails" open>
-      <summary><strong>Workout guide</strong> <span class="muted small">Nippard block 2, in order: Full Body, Upper, Lower. Stop 1 to 2 reps short of failure</span></summary>
+      <summary><strong>Workout guide</strong> <span class="muted small">Nippard block 2b, 45 min: in order Full Body, Upper, Lower. Pairs A and B back to back. Stop 1 to 2 reps short of failure</span></summary>
       <div class="row" id="guideChips" style="gap:6px; margin:8px 0;">
         <button type="button" class="ghost small" data-guide="Full Body">Full Body</button>
         <button type="button" class="ghost small" data-guide="Upper">Upper</button>
