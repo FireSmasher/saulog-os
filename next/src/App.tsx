@@ -9,7 +9,7 @@ import type { BuhatApi } from './components/Buhat'
 // Buhat (and its body map) loads when the tab is first opened.
 const Buhat = lazy(() => import('./components/Buhat').then((m) => ({ default: m.Buhat })))
 import { Reminder } from './components/Reminder'
-import { loadWorkouts, readWorkoutCache, removeLastSet, saveSet, writeWorkoutCache } from './lib/workouts'
+import { loadWorkouts, readWorkoutCache, removeLastSet, saveSet, saveSets, writeWorkoutCache } from './lib/workouts'
 
 // Dev only: http://localhost:5173/saulog-os/next/?demo shows made-up data, no sign-in.
 // import.meta.env.DEV is false in the build, so this branch and lib/demo.ts are dropped.
@@ -103,6 +103,7 @@ function useBuhatApi(session: Session | null | undefined): BuhatApi | null {
         ? {
             load: loadWorkouts,
             saveSet,
+            saveSets,
             removeLastSet,
             readCache: () => readWorkoutCache(userId),
             writeCache: (rows) => writeWorkoutCache(userId, rows),

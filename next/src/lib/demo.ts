@@ -84,6 +84,15 @@ export const demoBuhat: BuhatApi = {
     demoRows = row ? demoRows!.map((x) => (x.id === r.id ? r : x)) : [...demoRows!, r]
     return r
   },
+  saveSets: async (row, split, exercise, sets, date) => {
+    if (row && !sets.length) {
+      demoRows = demoRows!.filter((x) => x.id !== row.id)
+      return null
+    }
+    const r = row ? { ...row, sets } : wrow(date, split, exercise, sets.map((s): [number, number] => [s.weight, s.reps]))
+    demoRows = row ? demoRows!.map((x) => (x.id === r.id ? r : x)) : [...demoRows!, r]
+    return r
+  },
   removeLastSet: async (row) => (row.sets.length > 1 ? { ...row, sets: row.sets.slice(0, -1) } : null),
   readCache: () => null,
   writeCache: () => {},

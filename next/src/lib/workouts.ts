@@ -55,6 +55,30 @@ export async function saveSet(row: WorkoutRow | null, split: string, exercise: s
   return toRow(data)!
 }
 
+// Log by hand: today's or a past day's row gets exactly these sets (replaces what was
+// there, so it also fixes a wrong set). No sets left: the row goes.
+export async function saveSets(row: WorkoutRow | null, split: string, exercise: string, sets: WSet[], date: string): Promise<WorkoutRow | null> {
+  if (row) {
+    if (!sets.length) {
+      const { error } = await supabase.from('workout_logs').delete().eq('id', row.id)
+      if (error) throw error
+      return null
+    }
+    const { error } = await supabase.from('workout_logs').update({ sets }).eq('id', row.id)
+    if (error) throw error
+    return { ...row, sets }
+  }
+  if (!sets.length) return null
+  const main = musclesFor(exercise).main[0]
+  const { data, error } = await supabase
+    .from('workout_logs')
+    .insert({ date, time: localTime(), split, exercise, muscle: main ? MUSCLE_WORD[main] ?? null : null, sets, notes: 'saulog-next by hand' })
+    .select('id, date, time, split, exercise, sets')
+    .single()
+  if (error) throw error
+  return toRow(data)!
+}
+
 // Undo the last set: shorter list, or the row goes when it was the only set.
 export async function removeLastSet(row: WorkoutRow): Promise<WorkoutRow | null> {
   if (row.sets.length <= 1) {

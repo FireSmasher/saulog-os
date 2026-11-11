@@ -449,3 +449,116 @@
   gap: 1px;
   min-width: 0;
 }
+
+/* Typed numbers in the next-set editor and Log by hand (11 Nov 2026). */
+.num-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  min-width: 0;
+}
+
+.num-field {
+  width: 4.2ch;
+  min-width: 0;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.14);
+  text-align: center;
+  font: 600 16px/1 var(--font); /* 16px stops iOS zooming in */
+  padding: 6px 2px;
+  outline: none;
+}
+
+.num-field:focus {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.num-wrap small {
+  font: 500 12px/1 var(--font);
+  opacity: 0.8;
+}
+
+.manual-open {
+  align-self: center;
+  gap: 6px;
+  padding: 0 18px;
+}
+
+.manual-open svg {
+  width: 15px;
+  height: 15px;
+}
+
+.manual-sheet {
+  max-height: 88vh;
+  overflow-y: auto;
+  align-items: stretch;
+}
+
+.manual-sheet .sheet-title,
+.manual-sheet .sheet-grip {
+  align-self: center;
+}
+
+.manual-full {
+  width: 100%;
+}
+
+.manual-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manual-set {
+  display: grid;
+  grid-template-columns: 44px 1fr auto 1fr 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.manual-num {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0 10px;
+  min-width: 0;
+}
+
+.manual-num input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: 500 16px/1 var(--font);
+  color: var(--ink);
+  outline: none;
+}
+
+.manual-num small {
+  color: var(--ink2);
+  font: var(--t-small);
+}
+
+.manual-x {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--ink2);
+}
+
+.manual-add {
+  align-self: flex-start;
+  padding: 0 14px;
+}
+
+.sheet-btn:disabled {
+  opacity: 0.45;
+}

@@ -7,6 +7,7 @@ import {
   GUIDE,
   groupWords,
   isBest,
+  sameExercise,
   ORDER,
   restSeconds,
   setsLabel,
@@ -25,6 +26,7 @@ import { CheckIcon, FlameIcon, MedalIcon, MinusIcon, PlusIcon } from './Icons'
 export type BuhatApi = {
   load: () => Promise<WorkoutRow[]>
   saveSet: (row: WorkoutRow | null, split: string, exercise: string, set: WSet, date: string) => Promise<WorkoutRow>
+  saveSets: (row: WorkoutRow | null, split: string, exercise: string, sets: WSet[], date: string) => Promise<WorkoutRow | null>
   removeLastSet: (row: WorkoutRow) => Promise<WorkoutRow | null>
   readCache: () => WorkoutRow[] | null
   writeCache: (rows: WorkoutRow[]) => void
@@ -43,16 +45,170 @@ function todayLabel(date = new Date()): string {
 
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.max(0, Math.floor(s % 60))).padStart(2, '0')}`
 
-function Stepper({ label, value, onChange }: { label: string; value: string; onChange: (dir: -1 | 1) => void }) {
+// Typed numbers: comma or point, iOS shows the number pad (decimal for kg, digits for reps).
+export function parseNum(text: string): number | null {
+  const n = Number(text.trim().replace(',', '.'))
+  return text.trim() !== '' && Number.isFinite(n) && n >= 0 ? n : null
+}
+
+function NumField({ label, value, decimal, onChange }: { label: string; value: number; decimal: boolean; onChange: (n: number) => void }) {
+  const [text, setText] = useState(String(value))
+  const focused = useRef(false)
+  useEffect(() => {
+    if (!focused.current) setText(String(value))
+  }, [value])
+  return (
+    <input
+      className="num-field"
+      aria-label={label}
+      inputMode={decimal ? 'decimal' : 'numeric'}
+      pattern={decimal ? '[0-9]*[.,]?[0-9]*' : '[0-9]*'}
+      enterKeyHint="done"
+      value={text}
+      onFocus={(e) => {
+        focused.current = true
+        e.currentTarget.select()
+      }}
+      onBlur={() => {
+        focused.current = false
+        setText(String(value))
+      }}
+      onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+      onChange={(e) => {
+        setText(e.target.value)
+        const n = parseNum(e.target.value)
+        if (n !== null && (decimal || (Number.isInteger(n) && n > 0))) onChange(Math.round(n * 100) / 100)
+      }}
+    />
+  )
+}
+
+function Stepper({ label, unit, value, decimal, onStep, onSet }: {
+  label: string
+  unit: string
+  value: number
+  decimal: boolean
+  onStep: (dir: -1 | 1) => void
+  onSet: (n: number) => void
+}) {
   return (
     <div className="set-stepper">
-      <button aria-label={`Less ${label}`} onClick={() => onChange(-1)}>
+      <button aria-label={`Less ${label}`} onClick={() => onStep(-1)}>
         <MinusIcon />
       </button>
-      <span>{value}</span>
-      <button aria-label={`More ${label}`} onClick={() => onChange(1)}>
+      <label className="num-wrap">
+        <NumField label={label} value={value} decimal={decimal} onChange={onSet} />
+        <small>{unit}</small>
+      </label>
+      <button aria-label={`More ${label}`} onClick={() => onStep(1)}>
         <PlusIcon />
       </button>
+    </div>
+  )
+}
+
+type Draft = { w: string; r: string }
+const draftOf = (sets: WSet[]): Draft[] => sets.map((x) => ({ w: String(x.weight), r: String(x.reps) }))
+
+// Log by hand: any exercise, any day, any number of sets. An exercise already logged
+// that day opens with its sets so a wrong one can be fixed.
+function ManualSheet({ rows, names, start, today, onClose, onSave }: {
+  rows: WorkoutRow[]
+  names: string[]
+  start: { name: string; date: string }
+  today: string
+  onClose: () => void
+  onSave: (row: WorkoutRow | null, exercise: string, sets: WSet[], date: string) => Promise<boolean>
+}) {
+  const [name, setName] = useState(start.name)
+  const [date, setDate] = useState(start.date)
+  const [sets, setSets] = useState<Draft[]>([{ w: '', r: '' }])
+  const [busy, setBusy] = useState(false)
+  const existing = useMemo(
+    () => (name.trim() ? rows.filter((r) => r.date === date && sameExercise({ ex: name, sets: '', cue: '' }, r.exercise)).at(-1) ?? null : null),
+    [rows, name, date],
+  )
+  const loaded = useRef<string | null>(null)
+  useEffect(() => {
+    if (existing && loaded.current !== existing.id) {
+      loaded.current = existing.id
+      setSets(draftOf(existing.sets))
+    } else if (!existing && loaded.current) {
+      loaded.current = null
+      setSets([{ w: '', r: '' }])
+    }
+  }, [existing])
+
+  const parsed = sets.map((d) => ({ weight: parseNum(d.w), reps: parseNum(d.r) }))
+  const filled = parsed.filter((p) => p.weight !== null || p.reps !== null)
+  const bad = filled.some((p) => p.weight === null || p.reps === null || !Number.isInteger(p.reps) || p.reps < 1)
+  const clean: WSet[] = filled.filter(() => !bad).map((p) => ({ weight: p.weight!, reps: p.reps! }))
+  const canSave = !busy && name.trim() !== '' && !bad && (clean.length > 0 || existing !== null)
+
+  function put(i: number, field: keyof Draft, v: string) {
+    setSets((xs) => xs.map((x, j) => (j === i ? { ...x, [field]: v } : x)))
+  }
+
+  async function save() {
+    if (!canSave) return
+    setBusy(true)
+    const ok = await onSave(existing, existing?.exercise ?? name.trim(), clean, date)
+    setBusy(false)
+    if (ok) onClose()
+  }
+
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet manual-sheet" role="dialog" aria-label="Log by hand" onClick={(e) => e.stopPropagation()}>
+        <span className="sheet-grip" />
+        <h2 className="sheet-title">Log by hand</h2>
+        <label className="field manual-full">
+          Exercise
+          <input list="buhat-names" value={name} placeholder="DB Bench Press" autoCapitalize="words" onChange={(e) => setName(e.target.value)} />
+          <datalist id="buhat-names">
+            {names.map((n) => (
+              <option key={n} value={n} />
+            ))}
+          </datalist>
+        </label>
+        <label className="field manual-full">
+          Day
+          <input type="date" value={date} max={today} onChange={(e) => e.target.value && setDate(e.target.value)} />
+        </label>
+        {existing && <span className="small muted manual-full">Already logged that day: {setsLabel(existing.sets)}. Saving replaces it.</span>}
+        <div className="manual-sets manual-full">
+          {sets.map((d, i) => (
+            <div className="manual-set" key={i}>
+              <span className="small muted">Set {i + 1}</span>
+              <label className="manual-num">
+                <input aria-label={`Set ${i + 1} kg`} inputMode="decimal" placeholder="kg" value={d.w} onChange={(e) => put(i, 'w', e.target.value)} />
+                <small>kg</small>
+              </label>
+              <span className="muted">×</span>
+              <label className="manual-num">
+                <input aria-label={`Set ${i + 1} reps`} inputMode="numeric" pattern="[0-9]*" placeholder="reps" value={d.r} onChange={(e) => put(i, 'r', e.target.value)} />
+                <small>reps</small>
+              </label>
+              <button className="manual-x" aria-label={`Remove set ${i + 1}`} onClick={() => setSets((xs) => xs.filter((_, j) => j !== i))}>
+                ×
+              </button>
+            </div>
+          ))}
+          <button
+            className="way manual-add"
+            onClick={() => setSets((xs) => [...xs, { w: xs.at(-1)?.w ?? '', r: '' }])}
+          >
+            + Add set
+          </button>
+        </div>
+        {bad && <span className="small muted manual-full">Each set needs kg and whole reps.</span>}
+        <button className="btn sheet-btn" disabled={!canSave} onClick={() => void save()}>
+          {busy ? 'Saving' : existing && !clean.length ? 'Remove this exercise' : 'Save'}
+        </button>
+        <button className="link-btn" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
     </div>
   )
 }
@@ -145,6 +301,7 @@ export function Buhat({ api, footer, onToast }: Props) {
   const [edit, setEdit] = useState<WSet | null>(null)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [manual, setManual] = useState<{ name: string; date: string } | null>(null)
   const [rest, setRest] = useState<Rest | null>(() => {
     try {
       const r = JSON.parse(localStorage.getItem(REST_KEY) || 'null') as Rest | null
@@ -200,8 +357,48 @@ export function Buhat({ api, footer, onToast }: Props) {
 
   function change(field: 'weight' | 'reps', dir: -1 | 1) {
     if (!shown) return
-    const step = field === 'weight' ? (shown.weight >= 40 ? 2.5 : 1) : 1
+    const step = field === 'weight' ? (shown.weight >= 40 ? 2.5 : shown.weight < 10 ? 0.5 : 1) : 1
     setEdit({ ...shown, [field]: Math.max(field === 'weight' ? 0 : 1, Math.round((shown[field] + dir * step) * 10) / 10) })
+  }
+
+  function setTo(field: 'weight' | 'reps', n: number) {
+    if (!shown) return
+    setEdit({ ...shown, [field]: n })
+  }
+
+  // Today's rows that are not in this session's plan (a swap, an extra), shown under the list.
+  const extras = useMemo(
+    () => (rows ? rows.filter((x) => x.date === today && x.sets.length && !GUIDE[split].some((it) => sameExercise(it, x.exercise))) : []),
+    [rows, today, split],
+  )
+  const names = useMemo(() => {
+    const all = [...Object.values(GUIDE).flatMap((g) => g.flatMap((it) => [it.ex, ...(it.alt ?? [])])), ...(rows ?? []).map((x) => x.exercise)]
+    const seen = new Map<string, string>()
+    for (const n of all) if (!seen.has(n.toLowerCase())) seen.set(n.toLowerCase(), n)
+    return [...seen.values()].sort((a, b) => a.localeCompare(b))
+  }, [rows])
+
+  async function saveManual(row: WorkoutRow | null, exercise: string, sets: WSet[], date: string): Promise<boolean> {
+    if (!rows) return false
+    const daySplit = row?.split ?? rows.find((x) => x.date === date && ORDER.includes(x.split as SplitName))?.split ?? split
+    try {
+      const saved = await api.saveSets(row, daySplit, exercise, sets, date)
+      const next = row ? (saved ? rows.map((x) => (x.id === saved.id ? saved : x)) : rows.filter((x) => x.id !== row.id)) : saved ? [...rows, saved] : rows
+      setRows(next)
+      api.writeCache(next)
+      setEdit(null)
+      setEditing(false)
+      if (saved && kain && !kain.workoutDays.includes(date)) {
+        const k = { ...kain, workoutDays: [...kain.workoutDays, date] }
+        api.writeKain(k)
+        setKain(k)
+      }
+      onToast(saved ? `Saved ${exercise} ${setsLabel(saved.sets)}` : `Removed ${exercise}`)
+      return true
+    } catch {
+      onToast('Not saved. Check your connection and try again.')
+      return false
+    }
   }
 
   async function logSet(set: WSet | null = shown) {
@@ -331,8 +528,8 @@ export function Buhat({ api, footer, onToast }: Props) {
           </div>
           {editing && (
             <div className="next-set-edit">
-              <Stepper label="weight" value={fmtKg(shown.weight)} onChange={(d) => change('weight', d)} />
-              <Stepper label="reps" value={`${shown.reps} reps`} onChange={(d) => change('reps', d)} />
+              <Stepper label="weight" unit="kg" decimal value={shown.weight} onStep={(d) => change('weight', d)} onSet={(n) => setTo('weight', n)} />
+              <Stepper label="reps" unit="reps" decimal={false} value={shown.reps} onStep={(d) => change('reps', d)} onSet={(n) => setTo('reps', n)} />
             </div>
           )}
           {!editing && cur.nudge && cur.last.length > 0 && <span className="next-set-nudge">{cur.nudge}</span>}
@@ -380,7 +577,7 @@ export function Buhat({ api, footer, onToast }: Props) {
                   setSelected(i)
                   setEdit(null)
                   setRest(null)
-                }
+                } else setManual({ name: s.row?.exercise ?? s.item.ex, date: today })
               }}
             >
               <span className={s.complete ? 'ex-dot done' : i === curIndex ? 'ex-dot now' : 'ex-dot'}>{s.complete && <CheckIcon />}</span>
@@ -398,7 +595,26 @@ export function Buhat({ api, footer, onToast }: Props) {
               </span>
             </button>
           ))}
+          {extras.map((x) => (
+            <button key={x.id} className="ex-row" onClick={() => setManual({ name: x.exercise, date: today })}>
+              <span className="ex-dot done">
+                <CheckIcon />
+              </span>
+              <span className="ex-text">
+                <span className="food-name">{x.exercise}</span>
+                <span className="food-sub">Also today · {setsLabel(x.sets)}</span>
+              </span>
+            </button>
+          ))}
         </section>
+      )}
+      {rows && (
+        <button className="way manual-open" onClick={() => setManual({ name: '', date: today })}>
+          <PlusIcon /> Log by hand
+        </button>
+      )}
+      {rows && manual && (
+        <ManualSheet rows={rows} names={names} start={manual} today={today} onClose={() => setManual(null)} onSave={saveManual} />
       )}
       {footer}
     </>

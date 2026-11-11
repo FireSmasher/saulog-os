@@ -753,3 +753,9 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 ## UPDATE 2026-11-08 (Sevro)
 - Buhat guide = Nippard block 2b (45 min cap): Upper drops Seated DB Overhead Press and T-bar Row; pairs A/B in cues. Both apps (app.js, next/src/lib/buhat.ts). Source: Nippard/02_TRAINING/CURRENT BLOCK.md "BLOCK 2b".
 - Edwin: "when I open up saulog os, it should open up to the new version". Root index.html now redirects to next/ at once. Old app (Quarters, "Send N unsent logs") at ?old=1, remembered for that tab. New app Kain footer has a "Quarters and old app" link. sw.js v24.
+
+## UPDATE 2026-11-11 (Sevro): type numbers, Log by hand
+- Edwin: "I want to be able to manually input workouts and also to actually change the number through a numberpad, not just minus and plus". He could not log DB Bench Press (not in Upper) and got stuck at 4.8 kg on the lateral raise (steps were 1 kg under 40).
+- Next-set editor: weight and reps are now typed fields (iOS number pad, comma or point), plus and minus kept; weight step 0.5 kg under 10 kg.
+- "Log by hand" button under the exercise list: any exercise (suggestions from the plan and his history), any day up to today, any number of sets. If that exercise is already logged that day its sets open and Save replaces them (fixes a wrong set; empty = remove). Tapping a finished exercise opens it the same way. Rows not in today's plan show as "Also today". New `saveSets` in next/src/lib/workouts.ts, notes "saulog-next by hand".
+- Checked: npm test, build, headless Chrome on ?demo&tab=buhat (typed 4,5 -> 4.5 kg; logged DB Bench Press 20x6, 20x7, 22.5x7; reopened shows "Already logged"). Not checked on his phone. sw.js v25.
