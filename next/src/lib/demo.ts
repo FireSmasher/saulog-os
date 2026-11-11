@@ -6,6 +6,7 @@ import type { KainApi } from '../components/Kain'
 import type { KainData } from './food'
 import { toRow } from './plate'
 import { summarise } from './rewards'
+import type { ActivityLog } from './types-social'
 
 const FOODS: Record<string, [number, number, number, number, number]> = {
   // name: grams, kcal, protein, carb, fat
@@ -27,6 +28,13 @@ function row(date: string, time: string, name: string): FoodLog {
   }
 }
 
+function demoActivity(today: string): ActivityLog[] {
+  const mk = (i: number, time: string, kind: ActivityLog['kind'], minutes: number, km: number | null): ActivityLog => ({
+    id: `demo-act-${i}`, user_id: 'demo', date: today, time, kind, minutes, distance_km: km, steps: null, source: 'manual', created_at: new Date().toISOString(),
+  })
+  return [mk(1, '07:30', 'walk', 25, 2.1), mk(2, '12:40', 'bike', 40, 11.5)]
+}
+
 function build(today: string): KainData {
   const history: FoodLog[] = []
   const loggedDates: string[] = []
@@ -41,7 +49,7 @@ function build(today: string): KainData {
   }
   history.push(row(today, '08:05', 'Oats, rolled'), row(today, '08:06', 'Skyr'))
   void loggedDates
-  return { today, history, days: summarise(history), restDays: [], workoutDays: [], workoutBests: 0, targets: { kcal: 2000, protein: 160 }, savedAt: Date.now() }
+  return { today, history, days: summarise(history), restDays: [], workoutDays: [], workoutBests: 0, activity: demoActivity(today), steps: { [today]: 6420 }, targets: { kcal: 2000, protein: 160 }, savedAt: Date.now() }
 }
 
 export const demoApi: KainApi = {
@@ -98,4 +106,13 @@ export const demoBuhat: BuhatApi = {
   writeCache: () => {},
   readKain: () => null,
   writeKain: () => {},
+}
+
+// Move demo: add and delete only touch memory.
+export const demoMove = {
+  add: async (a: { date: string; time: string; kind: ActivityLog['kind']; minutes: number; distance_km?: number | null }): Promise<ActivityLog> => ({
+    id: `demo-act-${n++}`, user_id: 'demo', date: a.date, time: a.time, kind: a.kind, minutes: a.minutes,
+    distance_km: a.distance_km ?? null, steps: null, source: 'manual', created_at: new Date().toISOString(),
+  }),
+  remove: async (_id: string): Promise<void> => {},
 }

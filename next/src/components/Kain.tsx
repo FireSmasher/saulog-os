@@ -19,8 +19,9 @@ import {
   type WeekDot,
 } from '../lib/day'
 import { HISTORY_DAYS, type KainData } from '../lib/food'
-import { gain as gainOf, rewards as rewardsFrom, summarise, type Gain } from '../lib/rewards'
+import { gain as gainOf, rewards as rewardsFrom, summarise, type Gain, type MoveDay } from '../lib/rewards'
 import { JustLogged, Milestone, StreakSheet } from './Rewards'
+import { Move } from './Move'
 import type { saveMeal } from '../lib/capture'
 import type { CaptureMode } from './Capture'
 // The capture screen (photo, voice, scanner, search) loads on first use; the service worker
@@ -57,10 +58,23 @@ export function rewardsOf(d: KainData, today: string) {
     days,
     workoutDays: new Set(d.workoutDays),
     restDays: new Set(d.restDays),
+    activity: moveDays(d),
+    steps: new Map(Object.entries(d.steps ?? {})),
     today,
     proteinTarget: d.targets?.protein ?? 0,
     extraXp: 25 * (d.workoutBests ?? 0),
   })
+}
+
+export function moveDays(d: KainData): Map<string, MoveDay> {
+  const m = new Map<string, MoveDay>()
+  for (const a of d.activity ?? []) {
+    const x = m.get(a.date) ?? { minutes: 0, steps: d.steps?.[a.date] ?? 0 }
+    x.minutes += a.minutes ?? 0
+    x.steps = Math.max(x.steps, a.steps ?? 0)
+    m.set(a.date, x)
+  }
+  return m
 }
 
 const SEEN = 'saulog-next-milestones'
@@ -400,6 +414,18 @@ export function Kain({ api, footer, onToast, plusSignal }: Props) {
         </span>
         <ChevronRightIcon className="next-chev" />
       </button>
+
+      <Move
+        activity={data.activity ?? []}
+        steps={data.steps?.[today] ?? null}
+        today={today}
+        onToast={onToast}
+        onChange={(activity) => {
+          const next = { ...data, activity }
+          setData(next)
+          api.writeCache(next)
+        }}
+      />
 
       <div className="tiles">
         <section className="glass tile" aria-label="Calories">

@@ -2,6 +2,7 @@ import { supabase, loadTargets, myId, type Targets } from './supabase'
 import { addDays, localTime, type FoodLog } from './day'
 import { summarise, type DaySummary } from './rewards'
 import { loadWorkouts } from './workouts'
+import { loadActivity, loadSteps, type ActivityLog } from './activity'
 import { bestCount } from './buhat'
 
 export const COLUMNS = 'id, date, time, name, grams, kcal, protein, carb, fat, is_restaurant, item_type, item_id'
@@ -97,19 +98,23 @@ export type KainData = {
   restDays: string[]
   workoutDays: string[]
   workoutBests: number // best sets ever, +25 XP each
+  activity: ActivityLog[] // Move rows, last 42 days
+  steps: Record<string, number> // steps per day from Apple Health, last 42 days
   targets: Targets | null
   savedAt: number
 }
 
 export async function loadKain(today: string): Promise<KainData> {
-  const [history, days, restDays, targets, workouts] = await Promise.all([
+  const [history, days, restDays, targets, workouts, activity, steps] = await Promise.all([
     loadHistory(today),
     loadAllDays(today),
     loadRestDays(),
     loadTargets(),
     loadWorkoutSummary(),
+    loadActivity(today).catch(() => [] as ActivityLog[]), // table not pasted yet: Move stays empty
+    loadSteps(today).catch(() => ({}) as Record<string, number>),
   ])
-  return { today, history, days, restDays, workoutDays: workouts.days, workoutBests: workouts.bests, targets, savedAt: Date.now() }
+  return { today, history, days, restDays, workoutDays: workouts.days, workoutBests: workouts.bests, activity, steps, targets, savedAt: Date.now() }
 }
 
 // One tap on a usual food: a copy of that exact past row, logged now.
@@ -161,7 +166,7 @@ const cacheKey = (userId: string) => `saulog-next-kain:${userId}`
 export function readCache(userId: string): KainData | null {
   try {
     const d = JSON.parse(localStorage.getItem(cacheKey(userId)) || 'null') as KainData | null
-    return d && Array.isArray(d.days) && Array.isArray(d.workoutDays) && typeof d.workoutBests === 'number' ? d : null // older cache shape: reload
+    return d && Array.isArray(d.days) && Array.isArray(d.workoutDays) && typeof d.workoutBests === 'number' && Array.isArray(d.activity) ? d : null // older cache shape: reload
   } catch {
     return null
   }

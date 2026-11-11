@@ -9,7 +9,8 @@
 //   held uses it by itself and the streak carries on. No freeze: the streak starts again.
 // - Today not logged yet never breaks anything until it is over.
 // - XP per day: each meal logged is 10 XP plus 1 per food (up to 5); protein target hit
-//   +10; workout day +15. Streak milestones: +50 at every 7 days, +150 at 30, +500 at
+//   +10; workout day +15; move day (Move card) max(minutes / 2, steps / 500), floored,
+//   at most 30. An activity day counts for the streak like a food or workout day. Streak milestones: +50 at every 7 days, +150 at 30, +500 at
 //   100, +2000 at 365.
 // - Level L costs 125 x L XP to finish (L1 125, L2 250, L3 375, L4 500, ...).
 // - Never red, never loss copy: a broken streak just starts again.
@@ -39,6 +40,14 @@ export function dayXp(d: DaySummary | undefined, proteinTarget: number, workout:
   }
   if (workout) xp += 15
   return xp
+}
+
+export type MoveDay = { minutes: number; steps: number }
+export const MOVE_XP_CAP = 30
+
+export function moveXp(m: MoveDay | undefined): number {
+  if (!m) return 0
+  return Math.min(MOVE_XP_CAP, Math.max(0, Math.floor(Math.max(m.minutes / 2, m.steps / 500))))
 }
 
 export const MILESTONES = [7, 30, 100, 365]
@@ -79,14 +88,16 @@ type Input = {
   days: DaySummary[]
   workoutDays?: Set<string>
   restDays?: Set<string>
+  activity?: Map<string, MoveDay> // days with an activity row, with minutes and steps
+  steps?: Map<string, number> // Apple Health steps per day: XP only, never keeps a streak alone
   today: string
   proteinTarget: number
 }
 
-export function rewards({ days, workoutDays = new Set(), restDays = new Set(), today, proteinTarget, extraXp = 0 }: Input): Rewards {
+export function rewards({ days, workoutDays = new Set(), restDays = new Set(), activity = new Map(), steps = new Map(), today, proteinTarget, extraXp = 0 }: Input): Rewards {
   const byDate = new Map(days.map((d) => [d.date, d]))
-  const counted = (date: string) => byDate.has(date) || workoutDays.has(date) || restDays.has(date)
-  const allDates = [...byDate.keys(), ...workoutDays, ...restDays].filter((d) => d <= today).sort()
+  const counted = (date: string) => byDate.has(date) || workoutDays.has(date) || restDays.has(date) || activity.has(date)
+  const allDates = [...byDate.keys(), ...workoutDays, ...restDays, ...activity.keys()].filter((d) => d <= today).sort()
   const empty: Rewards = { streak: 0, best: 0, freezes: 0, frozen: new Set(), xp: 0, level: levelFor(0), todayCounts: false }
   if (!allDates.length) return empty
 
@@ -100,7 +111,7 @@ export function rewards({ days, workoutDays = new Set(), restDays = new Set(), t
     if (counted(day)) {
       streak++
       best = Math.max(best, streak)
-      xp += dayXp(byDate.get(day), proteinTarget, workoutDays.has(day)) + milestoneXp(streak)
+      xp += dayXp(byDate.get(day), proteinTarget, workoutDays.has(day)) + moveXp({ minutes: activity.get(day)?.minutes ?? 0, steps: Math.max(activity.get(day)?.steps ?? 0, steps.get(day) ?? 0) }) + milestoneXp(streak)
       if (streak % 7 === 0) freezes = Math.min(2, freezes + 1)
     } else if (isToday) {
       // not over yet

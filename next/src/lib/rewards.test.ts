@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { addDays } from './day.ts'
-import { gain, levelFor, rewards, summarise, type DaySummary } from './rewards.ts'
+import { gain, levelFor, moveXp, rewards, summarise, type DaySummary } from './rewards.ts'
 
 const day = (date: string, protein = 100): DaySummary => ({ date, slots: { lunch: 5 }, protein })
 const run = (start: string, n: number, skip: number[] = []) =>
@@ -65,4 +65,32 @@ test('gain reports what one save changed', () => {
   assert.equal(g.milestone, 7)
   assert.equal(g.freezeEarned, true)
   assert.equal(g.streak, 7)
+})
+
+test('an activity day counts for the streak like a food day', () => {
+  const act = new Map([['2026-10-02', { minutes: 20, steps: 0 }]])
+  const r = rewards({ days: [day('2026-10-01'), day('2026-10-03')], activity: act, today: '2026-10-03', proteinTarget: 160 })
+  assert.equal(r.streak, 3)
+  const only = rewards({ days: [], activity: act, today: '2026-10-02', proteinTarget: 160 })
+  assert.equal(only.streak, 1)
+  assert.equal(only.todayCounts, true)
+})
+
+test('move XP: max(minutes / 2, steps / 500), floored, capped at 30', () => {
+  assert.equal(moveXp(undefined), 0)
+  assert.equal(moveXp({ minutes: 25, steps: 0 }), 12)
+  assert.equal(moveXp({ minutes: 10, steps: 6420 }), 12)
+  assert.equal(moveXp({ minutes: 0, steps: 499 }), 0)
+  assert.equal(moveXp({ minutes: 120, steps: 0 }), 30)
+  assert.equal(moveXp({ minutes: 0, steps: 30000 }), 30)
+  const r = rewards({ days: [], activity: new Map([['2026-10-01', { minutes: 40, steps: 0 }]]), today: '2026-10-01', proteinTarget: 160 })
+  assert.equal(r.xp, 20)
+})
+
+test('steps give XP on a logged day but never keep a streak alone', () => {
+  const base = { days: [], workoutDays: new Set(['2026-11-10']), today: '2026-11-11', proteinTarget: 160 }
+  const plain = rewards(base)
+  const withSteps = rewards({ ...base, steps: new Map([['2026-11-10', 8000], ['2026-11-11', 9000]]) })
+  assert.equal(withSteps.xp - plain.xp, 16) // 8000 / 500 on the workout day; today has no log
+  assert.equal(withSteps.todayCounts, false)
 })
