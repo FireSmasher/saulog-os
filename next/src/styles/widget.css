@@ -1,0 +1,38 @@
+.widget-card p {
+  margin: 0;
+}
+
+.widget-code {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.widget-token {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font: 500 13px/1.4 ui-monospace, Menlo, monospace;
+  word-break: break-all;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.widget-row {
+  display: flex;
+  gap: 8px;
+}
+
+.widget-row .btn {
+  flex: 1;
+}
+
+.widget-steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

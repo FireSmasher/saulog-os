@@ -9,6 +9,7 @@ import type { BuhatApi } from './components/Buhat'
 // Buhat (and its body map) loads when the tab is first opened.
 const Buhat = lazy(() => import('./components/Buhat').then((m) => ({ default: m.Buhat })))
 import { Reminder } from './components/Reminder'
+import { WidgetToken } from './components/WidgetToken'
 import { loadWorkouts, readWorkoutCache, removeLastSet, saveSet, saveSets, writeWorkoutCache } from './lib/workouts'
 
 // Dev only: http://localhost:5173/saulog-os/next/?demo shows made-up data, no sign-in.
@@ -176,6 +177,7 @@ export default function App() {
                 session && (
                   <>
                   <Reminder />
+                  <WidgetToken />
                   <div className="footer-line small muted">
                     <span>{session.user.email}</span>
                     <button className="link-btn" onClick={signOut}>
