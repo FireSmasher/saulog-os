@@ -56,7 +56,7 @@ the blue variable it produces and rename it so later steps can reference it:
   - `apikey` = `sb_publishable_oaRcQ24PWSG56ntbdGBDWg_mIeCcul8`
   - `Content-Type` = `application/json`
 - Request Body: **JSON**
-  - `email` (Text) = `fortsaulog@gmail.com`
+  - `email` (Text) = your sign-in email
   - `password` (Text) = your Supabase Auth password
 
 The password lives only inside this Shortcut on your device, same trust level as Safari's

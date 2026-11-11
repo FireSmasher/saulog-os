@@ -397,7 +397,7 @@ update, delete on ... to authenticated, service_role;` lines at the bottom,
 don't skip them, a fresh project without them fails every query with Postgres
 `42501 permission denied` even with valid credentials.
 
-One user exists: `fortsaulog@gmail.com`, Email provider. `config.js` holds the
+One user exists: his own sign-in email, Email provider. `config.js` holds the
 public project URL + publishable key (safe to be public, RLS is the actual
 gate). `~/.saulog-os-service.json` (local, untracked, Edwin-created-only) holds
 `supabase_url` + `service_role_key`, and needs a `user_id` key added before

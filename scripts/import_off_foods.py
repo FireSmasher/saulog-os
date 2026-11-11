@@ -23,7 +23,7 @@ import urllib.error
 # Edeka, then Netto with whatever room is left.
 STORES = ["lidl", "rewe", "edeka", "netto"]
 BASE = "https://world.openfoodfacts.org/api/v2/search"
-UA = "SaulogOS-KainImport/1.0 (fortsaulog@gmail.com)"
+UA = "SaulogOS-KainImport/1.0 (personal food tracker)"
 PAGE_SIZE = 100
 MAX_ITEMS = 5000
 FIELDS = "code,product_name,brands,nutriments,completeness"

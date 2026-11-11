@@ -12,7 +12,7 @@ Usage:
 Credentials come from ~/.saulog-os-service.json (see query-logs.py / HANDOFF.md,
 "Setup: Supabase"), which must ALSO carry a "user_id" key — the UUID of the one
 Saulog OS account, visible in the Supabase dashboard under Authentication -> Users
-next to fortsaulog@gmail.com. Edwin adds this to the file himself; this script will
+next to the sign-in email. Edwin adds this to the file himself; this script will
 not create or ask for it (same credential-boundary rule as query-logs.py).
 
 Uses the service_role key, which bypasses Row Level Security by design — supabase/
