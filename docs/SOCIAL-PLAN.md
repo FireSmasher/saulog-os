@@ -5,6 +5,46 @@ Rulings by Edwin (11 Nov, do not re-ask): Scriptable widget (no paid Apple accou
 friends see EVERYTHING; under 10 friends, all iPhone; activity from Strava plus a manual
 tap-to-log for any kind (walk, run, bike, row, stairs, other).
 
+## Rulings, question rounds 11 Nov (Edwin's answers, binding)
+
+Models: HYBRID. Opus for W2, W3, W7 (and W5). Sonnet for W4 and W6.
+Activity: tap-to-log plus Apple Health Shortcut (steps 12:00, 18:00, 21:30). No Strava.
+Reminders:
+- Kinds: meals, workout, walk, streak saver.
+- Volume: match Duolingo (research doc), no hard low cap; Edwin has high tolerance. Never two
+  within 60 min, never the same kind twice before the person acts.
+- NO quiet hours. Be smart with timing. iOS Focus/Sleep already delivers silently, so send anyway.
+- Workout days learned from history (weekdays usually trained); under 3 weeks of data:
+  remind when 2 days without a workout.
+- Tone: mix, the bandit picks. Very witty, direct, persistent, true. "Savage mode" per person
+  (on for Edwin, friends choose at sign-up): swearing allowed, Goggins or Ramsay energy.
+  Hard rule from Edwin: "it must be constructive criticism though, no bullying at all.
+  bullying is not tolerated". So: roast the excuse, never the person; no body, weight or
+  food shaming; no slurs; never quote or name a real person. Every message ends pointing
+  at one concrete action. Clean versions exist for every savage message.
+Friends:
+- Invite link only (crew code). Friends see everything.
+- Kudos (push to owner), nudge a friend (max once a day per pair), comments (writer or
+  post owner can delete), friend challenges: train X times, hit protein X days,
+  move X minutes, log every meal (5 days, like Friends Quests).
+- Pushes about friends: big moments only (finished workout, streak milestone, passed you on
+  the table), max one per friend per day.
+- Each friend sets own calorie and protein targets at sign-up (weight, height, goal).
+- Workout plans: pick a starter (Edwin's Nippard block, 3-day full body, push pull legs)
+  or build their own; Log by hand always works.
+Levels:
+- Weekly crew table resets Monday 00:00 Berlin. Winner: crown for the next week, +100 XP,
+  hall of fame.
+- Streak freezes: earned (1 per 7 days in a row, hold max 2) AND buyable for 200 XP.
+- Move XP: higher of minutes (1 per 2 min) or steps (1 per 500), max 30 a day.
+Widget: Scriptable, streak only: flame, day count, done today or not, looks worse toward
+midnight when not done.
+Name: "Apoy". FULL rename including the URL (repo becomes apoy). Do it LAST: first the old
+app's "Send N unsent logs" and Quarters checked, then rename, then Edwin reinstalls from
+the new URL. The local folder name never changes.
+Order: Edwin first (reminders, Move, Health, widget), then friends (sign-up, crew, feed,
+kudos, comments, challenges), then the rename.
+
 ## Facts found while planning (11 Nov)
 
 - The 31 Oct server paste (`supabase/next-setup.sql`, two Edge Functions, cron) was never run:
@@ -66,7 +106,13 @@ against the live project, does NOT touch secrets. Report: files changed, tests, 
 | W6 | Widget: Edge Function `widget` (GET with token, returns streak, today done or not, XP, level, crew top 3), plus `scriptable/streak-widget.js` (small and medium sizes, colours from the app, flame state: done today, at risk after 18:00, frozen). Token made in Settings, shown once. | `supabase/functions/widget/index.ts`, `supabase/functions/_shared/rewards.ts` (copy of rewards.ts), `scriptable/streak-widget.js`, `next/src/components/WidgetToken.tsx` | W2 |
 | W7 | Server reminder sender: replace push-daily with `nudge` (every 15 min, uses W3 logic copied to `_shared`, writes notification_events), service worker reports opens. | `supabase/functions/nudge/index.ts`, `supabase/functions/_shared/nudge.ts`, `next/sw/*`, `supabase/nudge-cron.sql` | W2, W3 |
 
-Order: wave 1 = W1, W2 (parallel). Wave 2 = W3, W4, W6. Wave 3 = W5, W7.
+W2 scope grows with the rulings: also `user_settings` (savage_mode, kcal and protein
+targets, plan choice, timezone), `kudos`, `comments`, `friend_nudges`, `challenges` and
+`challenge_members`, `freeze_purchases` (XP spend ledger), `custom_plans`. The schema
+covers both phases now so no second migration is needed; the friend UI comes later.
+
+Order: wave 1 = W1 (done), W2. Wave 2 = W3, W4, W6 plus the Health Shortcut steps.
+Wave 3 = W7 (Edwin-only reminders live). Wave 4 = W5 and the social pieces. Wave 5 = rename.
 Sevro reviews and merges every worktree, runs the full checks, screenshots on `?demo`,
 commits and pushes (standing order), and keeps HANDOFF.md current.
 
