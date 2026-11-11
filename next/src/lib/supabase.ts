@@ -45,3 +45,18 @@ export async function myId(): Promise<string> {
   if (!id) throw new Error('Signed out')
   return id
 }
+
+// Push taps: the service worker cannot read localStorage, so the current access token is
+// kept in Cache Storage (cache "apoy-session", key "./__session") for mark_push_opened.
+// Cleared on sign-out. Same origin only; nothing leaves the phone from here.
+async function keepSessionForWorker(token: string | null, expiresAt: number | null) {
+  try {
+    if (!('caches' in self)) return
+    const c = await caches.open('apoy-session')
+    if (!token) await c.delete('./__session')
+    else await c.put('./__session', new Response(JSON.stringify({ access_token: token, expires_at: expiresAt })))
+  } catch {
+    // private mode or storage blocked: taps just are not counted
+  }
+}
+supabase.auth.onAuthStateChange((_e, s) => void keepSessionForWorker(s?.access_token ?? null, s?.expires_at ?? null))

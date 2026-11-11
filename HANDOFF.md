@@ -773,3 +773,13 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - OPEN before the first friend joins: hub/today.py (edwinsaulog-dashboard) and scripts/query-logs.py read
   with the service role, so they will see every crew member. Both need a user_id filter.
 - DONE 11 Nov (Edwin: "share photos and weight"): crew read on food_photos, meal-photos files, weight_logs. targets stays private. Steps alone never keep a streak (Edwin: "no need to add steps keep streak").
+
+## UPDATE 2026-11-11 night (Sevro): W3, W4, W6, W7 merged
+- Merged: W3 reminder engine (next/src/lib/nudge*.ts, savage mode harder, streak saver from day 2, rare meals skipped),
+  W4 Move card (activity.ts, Move.tsx; steps give XP, never keep a streak alone), W6 widget (functions/widget,
+  scriptable/streak-widget.js, WidgetToken.tsx), W7 sender (functions/nudge, supabase/nudge-setup.sql, sw-template.js).
+- Deploy by paste: `cd next && npm run bundle` writes supabase/functions/<name>/bundled.ts (one file each, nudge and
+  widget) for the dashboard editor; `npm test` fails if a bundle or a _shared copy is stale.
+- Push taps: app keeps its token in Cache Storage (apoy-session) so the worker can call mark_push_opened.
+- Not written: supabase/nudge-setup.test.md (Jev #556, credential-looking curl). Deploy checks go in chat instead.
+- Jev fix in progress: own_cleared_public_push (plain push, root-owned data/public_push_repos.txt, clean diff).

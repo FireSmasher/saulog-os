@@ -57,6 +57,7 @@ export const DUE_WINDOW_MIN: Record<HabitGoal, number> = { breakfast: 180, lunch
 export const GAP_MIN = 60
 export const STREAK_SAVER_FIRST_H = 3
 export const STREAK_SAVER_SECOND_H = 1
+export const STREAK_SAVER_MIN_STREAK = 2
 export const DEFAULT_STEP_GOAL = 8000
 export const LEARN_MIN_DAYS = 21 // under 3 weeks of workout history: use the 2-day gap rule
 export const WORKOUT_GAP_DAYS = 2
@@ -299,10 +300,11 @@ export function candidates(state: NudgeState, now: Date): Candidate[] {
   const streakVars: Record<string, string> = state.streak >= 2 ? { streak: String(state.streak) } : {}
   const out: Candidate[] = []
 
-  // Streak saver: nothing counts today yet, 3 h and 1 h before local midnight.
+  // Streak saver: a streak of 2+ days and nothing counts today yet, 3 h and 1 h before
+  // local midnight (Edwin 11 Nov: a 1-day streak has too little to lose).
   const midnight = instantOf(addDays(today, 1), '00:00', tz)
   const left = midnight - nowMs
-  if (!anyToday && left <= STREAK_SAVER_FIRST_H * 3_600_000) {
+  if (!anyToday && state.streak >= STREAK_SAVER_MIN_STREAK && left <= STREAK_SAVER_FIRST_H * 3_600_000) {
     const n = sentToday.filter((s) => s.goal === 'streak_saver').length
     if (n === 0 || (n === 1 && left <= STREAK_SAVER_SECOND_H * 3_600_000)) {
       const hoursLeft = String(Math.min(STREAK_SAVER_FIRST_H, Math.max(1, Math.ceil(left / 3_600_000))))

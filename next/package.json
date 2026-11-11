@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "TZ=Europe/Berlin node --test src/lib/ && node scripts/check-shared.mjs",
+    "test": "TZ=Europe/Berlin node --test src/lib/ && node scripts/check-shared.mjs && node scripts/bundle-functions.mjs --check",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "bundle": "node scripts/bundle-functions.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",
