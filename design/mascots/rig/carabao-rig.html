@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apoy Carabao Rig</title>
+<style>
+:root{--bg:#f6f4ee;--card:#fffdf8;--ink:#2a2420;--muted:#8a8178;--line:#e8e2d6;--accent:#ff6a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1714;--card:#25211d;--ink:#f3ede4;--muted:#a59b90;--line:#3a332c}}
+:root[data-theme="dark"]{--bg:#1a1714;--card:#25211d;--ink:#f3ede4;--muted:#a59b90;--line:#3a332c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,"Avenir Next",sans-serif;padding:24px 16px}
+h1{font-size:26px;margin:0 0 4px}
+p.sub{color:var(--muted);margin:0 0 16px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;max-width:1100px}
+@media (max-width:760px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px}
+.card h2{font-size:14px;color:var(--muted);margin:0 0 6px;font-weight:600}
+svg{width:100%;height:auto;display:block}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+button{font:inherit;font-weight:600;border:1px solid #e8e2d6;background:#fff;color:#2a2420;border-radius:999px;padding:8px 14px;cursor:pointer}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.orig{width:100%;border-radius:12px;background:#fffbf0}
+</style>
+</head>
+<body>
+<h1>Carabao rig test</h1>
+<p class="sub">Every part moves on its own: eyes look around and blink, nose twitches, mouth changes, ears wiggle, arms, legs and tail move. Left is the rig, right is the drawing you picked.</p>
+<div class="wrap">
+<div class="card" style="background:#fffbf0;color:#2a2420"><h2>Rig (live)</h2>
+<svg id="rig" viewBox="80 120 820 820" role="img" aria-label="Animated carabao">
+  <defs>
+    <clipPath id="eyeL"><ellipse cx="336" cy="466" rx="18" ry="16"/></clipPath><clipPath id="eyeR"><ellipse cx="504" cy="466" rx="18" ry="16"/></clipPath>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="#ff8a00" flood-opacity="0"/></filter>
+  <filter id="aura" x="-40%" y="-40%" width="180%" height="180%"><feMorphology in="SourceAlpha" operator="dilate" radius="14" result="d"/><feGaussianBlur in="d" stdDeviation="20" result="b"/><feFlood flood-color="#ffa000" result="c"/><feComposite in="c" in2="b" operator="in"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <radialGradient id="warm" cx="50%" cy="55%" r="50%"><stop offset="0" stop-color="#ff9a00" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a00" stop-opacity="0"/></radialGradient>
+  </defs>
+  <g id="powerBack" opacity="0"><ellipse cx="515" cy="560" rx="420" ry="460" fill="url(#warm)"/><ellipse id="ring" cx="465" cy="885" rx="230" ry="26" fill="none" stroke="#ff8a00" stroke-width="8"/></g>
+  <g id="streaks" stroke="#ffd36a" stroke-linecap="round"></g>
+  <g id="auraFx" filter="url(#soft)"></g>
+  <use id="auraGlow" href="#char" filter="url(#aura)" opacity="0"/>
+  <ellipse id="shadow" cx="465" cy="885" rx="230" ry="20" fill="rgba(70,45,25,.16)"/>
+  <g id="char" filter="url(#glow)" stroke="#2a1e1e" stroke-width="13" stroke-linejoin="round" stroke-linecap="round">
+    <g id="legL"><path d="M318 820 L318 856" stroke-width="60"/><path d="M318 820 L318 856" stroke="#878282" stroke-width="34"/><ellipse cx="312" cy="866" rx="44" ry="17" fill="#3c3434"/></g>
+    <g id="legR"><path d="M530 820 L530 856" stroke-width="60"/><path d="M530 820 L530 856" stroke="#878282" stroke-width="34"/><ellipse cx="524" cy="866" rx="44" ry="17" fill="#3c3434"/></g>
+    <g id="headBack">
+      <g id="earL"><ellipse cx="200" cy="422" rx="64" ry="27" fill="#878282" transform="rotate(-8 200 422)"/><ellipse cx="190" cy="424" rx="36" ry="12" fill="#6d6868" stroke="none" transform="rotate(-8 200 422)"/></g>
+      <g id="earR"><ellipse cx="650" cy="420" rx="56" ry="25" fill="#878282" transform="rotate(8 650 420)"/><ellipse cx="660" cy="422" rx="32" ry="11" fill="#6d6868" stroke="none" transform="rotate(8 650 420)"/></g>
+      <path d="M252 345 C200 340 160 300 170 255 Q178 242 188 258 C196 290 226 308 268 312 Z" fill="#dcdcd8"/>
+      <path d="M688 340 C740 335 776 300 762 255 Q754 242 744 258 C738 288 712 305 676 310 Z" fill="#dcdcd8"/>
+    </g>
+    <g id="torso"><path d="M262 380 C245 450 242 515 250 560 C200 612 186 700 214 770 C238 830 288 856 340 856 L598 856 C660 850 718 802 738 722 C754 642 714 586 648 548 C614 500 606 440 606 380 Z" fill="#878282"/></g>
+    <g id="armL"><path d="M178 760 L262 705" stroke-width="28"/><path d="M178 760 L262 705" stroke="#6d6d6d" stroke-width="12"/>
+      <rect x="132" y="732" width="56" height="62" rx="12" fill="#5e5a5a" transform="rotate(-33 160 763)"/>
+      <path d="M230 612 L254 700" stroke-width="64"/><path d="M230 612 L254 700" stroke="#878282" stroke-width="38"/><circle cx="256" cy="710" r="27" fill="#878282"/></g>
+    <g id="armR"><path d="M694 598 L716 712" stroke-width="64"/><path d="M694 598 L716 712" stroke="#878282" stroke-width="38"/></g>
+    <g id="head">
+      <ellipse cx="470" cy="392" rx="215" ry="16" fill="rgba(0,0,0,.14)" stroke="none"/>
+      <g id="eyes" stroke="none"><g clip-path="url(#eyeL)"><ellipse cx="336" cy="466" rx="18" ry="16" fill="#1e1616"/><g class="shine"><circle cx="342" cy="460" r="4" fill="#fff"/></g><g class="lid"><rect x="308" y="392" width="56" height="54" fill="#878282"/><path d="M314 446 Q336 454 358 446" fill="none" stroke="#1e1616" stroke-width="6"/></g></g><g clip-path="url(#eyeR)"><ellipse cx="504" cy="466" rx="18" ry="16" fill="#1e1616"/><g class="shine"><circle cx="510" cy="460" r="4" fill="#fff"/></g><g class="lid"><rect x="476" y="392" width="56" height="54" fill="#878282"/><path d="M482 446 Q504 454 526 446" fill="none" stroke="#1e1616" stroke-width="6"/></g></g></g>
+      <g id="nose"><ellipse cx="420" cy="496" rx="35" ry="18" fill="#3c3434" stroke="none"/><ellipse cx="405" cy="497" rx="6" ry="4" fill="#1a1414" stroke="none"/><ellipse cx="435" cy="497" rx="6" ry="4" fill="#1a1414" stroke="none"/></g>
+      <g id="mouths" stroke-width="7">
+        <path data-m="w" d="M400 534 Q420 516 440 534" fill="none"/>
+        <path data-m="flat" d="M402 528 L438 528" fill="none"/>
+        <path data-m="smile" d="M398 520 Q420 550 442 520 Q420 528 398 520 Z" fill="#8a3330"/>
+        <ellipse data-m="o" cx="420" cy="530" rx="12" ry="14" fill="#8a3330"/>
+        <ellipse data-m="yawn" cx="420" cy="535" rx="18" ry="24" fill="#8a3330"/>
+        <path data-m="grin" d="M392 518 Q420 560 448 518 Z" fill="#8a3330"/>
+      </g>
+    </g>
+    <g id="tail"><path d="M198 378 Q495 400 792 364 Q700 302 510 236 Q300 300 198 378 Z" fill="#f1c98d"/>
+      <g stroke="#d9aa66" stroke-width="7" fill="none"><path d="M510 248 L300 362"/><path d="M510 248 L420 376"/><path d="M510 248 L512 380"/><path d="M510 248 L612 374"/><path d="M510 248 L716 364"/><path d="M330 330 Q510 350 690 326"/><path d="M412 290 Q510 302 612 288"/></g>
+      <g id="flame"></g></g>
+  </g>
+  <g id="sparks" fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+  <g id="zzz" fill="#8a8178" font-weight="800" font-family="Avenir Next, sans-serif" opacity="0"><text x="760" y="300" font-size="40">z</text><text x="800" y="250" font-size="54">z</text><text x="850" y="190" font-size="70">Z</text></g>
+</svg>
+<div class="btns" id="btns"></div>
+</div>
+<div class="card"><h2>The drawing you picked</h2><img class="orig" src="../carabao_7.png" alt="Original carabao drawing"></div>
+</div>
+<script>
+const R={"tailAmp": 0.22, "lid": 40, "nose": [420, 496], "earL": [250, 420], "earR": [600, 420], "ground": [470, 868], "head": [470, 560], "shadow": [465, 885], "armL": [230, 612], "armR": [694, 598], "tail": [495, 375], "flame": [495, 200], "look": [5, 4], "cx": 468, "cy": 570, "rx": [300, 370], "ry": [330, 385], "floor": 860};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const MOODS={idle:'Idle',happy:'Happy',tired:'Tired',fire:'On fire',wave:'Wave',talk:'Talk'};
+let mood='idle';
+const btns=$('#btns');
+for(const [k,v] of Object.entries(MOODS)){const b=document.createElement('button');b.textContent=v;b.onclick=()=>{mood=k;t0=performance.now();$$('#btns button').forEach(x=>x.classList.toggle('on',x===b))};if(k==='idle')b.classList.add('on');btns.appendChild(b)}
+const el={char:$('#char'),head:$('#head'),torso:$('#torso'),earL:$('#earL'),earR:$('#earR'),armL:$('#armL'),armR:$('#armR'),legL:$('#legL'),legR:$('#legR'),tail:$('#tail'),nose:$('#nose'),flame:$('#flame'),shadow:$('#shadow'),zzz:$('#zzz'),glow:$('#glow feDropShadow')};
+const lids=$$('.lid'), shines=$$('.shine'), mouths=$$('#mouths [data-m]');
+const T=(e,s)=>e.setAttribute('transform',s);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let look={x:0,y:0,tx:0,ty:0,next:0}, blink={at:1.5,len:.14}, twitch={at:2}, talk={m:'w',next:0}, t0=performance.now();
+function setMouth(m){mouths.forEach(p=>p.style.display=p.dataset.m===m?'':'none')}
+function frame(now){
+  const t=now/1000, tm=(now-t0)/1000, S=Math.sin;
+  // eyes: pick a new spot to look at every 1 to 3 s, ease toward it
+  if(t>look.next){look.tx=rnd(-1,1);look.ty=rnd(-.6,.6);if(Math.random()<.3){look.tx=0;look.ty=0}look.next=t+rnd(1,3)}
+  look.x+=(look.tx-look.x)*.12; look.y+=(look.ty-look.y)*.12;
+  shines.forEach(s=>T(s,`translate(${look.x*R.look[0]} ${look.y*R.look[1]})`));
+  // blink
+  if(t>blink.at+blink.len){blink.at=t+rnd(1.8,4.5);if(Math.random()<.25)blink.at=t+.25}
+  let lid=0; const bp=(t-blink.at)/blink.len; if(bp>=0&&bp<=1)lid=S(bp*Math.PI);
+  let lidBase={tired:.55,happy:0,fire:0}[mood]||0;
+  if(mood==='happy')lidBase=.0;
+  lid=Math.max(lid,lidBase+(mood==='tired'?.12*S(t*.9):0));
+  lids.forEach(l=>T(l,`translate(0 ${lid*R.lid})`));
+  // nose twitch
+  if(t>twitch.at+.35)twitch.at=t+rnd(1.5,4);
+  const np=(t-twitch.at)/.35, nt=np>=0&&np<=1?S(np*Math.PI*3)*.18:0;
+  T(el.nose,`translate(${R.nose}) scale(${1+nt} ${1-nt*.6}) translate(${R.nose.map(v=>-v)})`);
+  // ears
+  const ew=mood==='happy'?8:mood==='tired'?-10:3;
+  T(el.earL,`rotate(${ew*.5+S(t*1.3)*ew*.4 - (mood==='tired'?8:0)} ${R.earL})`);
+  T(el.earR,`rotate(${-ew*.5-S(t*1.3+1)*ew*.4 + (mood==='tired'?8:0)} ${R.earR})`);
+  // body: breathing, hop, shake
+  const br=S(t*2*Math.PI/(mood==='tired'?4:2.8));
+  let hop=0,sx=1+br*-.012,sy=1+br*.02,shake=0,tilt=0;
+  if(mood==='happy'){const p=(tm*1.1)%1;hop=-Math.max(0,S(p*Math.PI))*70;const g=p<.1||p>.92;sx=g?1.08:.96;sy=g?.9:1.05}
+  if(mood==='fire'){hop=-Math.abs(S(t*9))*4;shake=S(t*31)*3.5}
+  if(mood==='tired'){tilt=S(t*.8)*4+3;sy=.97+br*.015}
+  T(el.char,`translate(${shake} ${hop}) translate(${R.ground}) scale(${sx} ${sy}) translate(${R.ground.map(v=>-v)})`);
+  T(el.head,`rotate(${tilt + (mood==='talk'?S(t*3)*3:0) + look.x*2} ${R.head})`);
+  T(el.shadow,`translate(${R.shadow}) scale(${1+hop/240}) translate(${R.shadow.map(v=>-v)})`);
+  el.shadow.setAttribute('opacity',1+hop/160);
+  // arms
+  let aL=S(t*1.5)*4, aR=-S(t*1.5)*4;
+  if(mood==='wave'){aR=-135+S(t*10)*22;aL=S(t*1.5)*4}
+  if(mood==='happy'){aL=125+S(t*14)*15;aR=-125-S(t*14)*15}
+  if(mood==='fire'){aL=95+S(t*9)*30;aR=-95+S(t*9+Math.PI)*30}
+  if(mood==='tired'){aL=-4+S(t*.8)*3;aR=4-S(t*.8)*3}
+  if(mood==='talk'){aR=-40+S(t*4)*25}
+  T(el.armL,`rotate(${aL} ${R.armL})`); T(el.armR,`rotate(${aR} ${R.armR})`);
+  // legs: stepping when excited
+  let lL=0,lR=0; if(mood==='fire'||mood==='happy'){const sp=mood==='fire'?9:7;lL=-Math.max(0,S(t*sp))*16;lR=-Math.max(0,-S(t*sp))*16}
+  T(el.legL,`translate(0 ${lL})`); T(el.legR,`translate(0 ${lR})`);
+  // tail
+  const tw=(mood==='tired'?4:mood==='fire'?22:12)*(R.tailAmp||1);
+  T(el.tail,`rotate(${S(t*(mood==='fire'?6:1.7))*tw} ${R.tail})`);
+  // mouth
+  let m='w';
+  if(mood==='happy')m='smile'; if(mood==='fire')m='grin';
+  if(mood==='tired'){m=(tm%6)>4.6?'yawn':'flat'}
+  if(mood==='wave')m=(tm%2)<1.2?'smile':'w';
+  if(mood==='talk'){if(t>talk.next){talk.m=['o','w','smile','o','flat'][Math.floor(rnd(0,5))];talk.next=t+rnd(.09,.2)}m=talk.m}
+  setMouth(m);
+  // flame
+  const fs=mood==='fire'?1.5+S(t*20)*.08:mood==='tired'?.55+S(t*2)*.04:1+S(t*12)*.05;
+  T(el.flame,`translate(${R.flame}) scale(${fs*(1+S(t*17)*.04)} ${fs*(1+S(t*13)*.07)}) rotate(${S(t*7)*4}) translate(${R.flame.map(v=>-v)})`);
+  el.flame.setAttribute('opacity',mood==='tired'?.6:1);
+  el.glow.setAttribute('flood-opacity',mood==='fire'?.55+S(t*8)*.2:0);
+  el.zzz.setAttribute('opacity',mood==='tired'?.5+S(t*1.5)*.4:0);
+  requestAnimationFrame(frame);
+}
+setMouth('w'); requestAnimationFrame(frame);
+// power-up aura: flame tongues rise off the body, streaks shoot up, sparks crackle
+const NS='http://www.w3.org/2000/svg', fx=$('#auraFx'), sk=$('#sparks'), st=$('#streaks');
+const TONGUE='M0 -1 C.55 -.45 .62 .45 0 .62 C-.62 .45 -.55 -.45 0 -1Z';
+const parts=[...Array(90)].map(()=>{const e=document.createElementNS(NS,'path');e.setAttribute('d',TONGUE);fx.appendChild(e);return{e,life:0,age:1}});
+const lines=[...Array(14)].map(()=>{const e=document.createElementNS(NS,'line');st.appendChild(e);return{e,age:1,life:1}});
+let sparkUntil=0,nextSpark=0,last=performance.now();
+const lerp=(a,b,k)=>a+(b-a)*k;
+function col(k){const c=k<.35?[[255,236,110],[255,170,20],k/.35]:[[255,170,20],[226,58,0],(k-.35)/.65];return`rgb(${c[0].map((v,i)=>Math.round(lerp(v,c[1][i],c[2]))).join(',')})`}
+function aura(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now; const on=mood==='fire', t=now/1000;
+  $('#powerBack').setAttribute('opacity',on?.9:0); $('#auraGlow').setAttribute('opacity',on?.75+Math.sin(t*10)*.2:0);
+  const r=$('#ring'), rp=(t*1.6)%1; r.setAttribute('rx',160+rp*170); r.setAttribute('ry',20+rp*22); r.setAttribute('opacity',on?(1-rp)*.8:0);
+  for(const p of parts){
+    p.age+=dt/p.life;
+    if(p.age>=1){ if(!on){p.e.setAttribute('opacity',0);continue}
+      const a=Math.random()*Math.PI*2; p.x=R.cx+Math.cos(a)*lerp(R.rx[0],R.rx[1],Math.random()); p.y=R.cy+Math.sin(a)*lerp(R.ry[0],R.ry[1],Math.random());
+      if(p.y>R.floor)p.y=R.floor; p.vx=(R.cx-p.x)*.35+lerp(-30,30,Math.random()); p.vy=-lerp(260,420,Math.random()); p.sz=lerp(32,78,Math.random()); p.life=lerp(.45,.9,Math.random()); p.age=0; p.ph=Math.random()*6}
+    p.x+=p.vx*dt+Math.sin(t*9+p.ph)*1.2; p.y+=p.vy*dt; const k=p.age, w=p.sz*(1-k*.6), h=p.sz*(1.2+k*1.4);
+    p.e.setAttribute('transform',`translate(${p.x} ${p.y}) scale(${w} ${h})`); p.e.setAttribute('fill',col(k)); p.e.setAttribute('opacity',on?(k<.15?k/.15:1-(k-.15)/.85)*.9:0)}
+  for(const l of lines){
+    l.age+=dt/l.life;
+    if(l.age>=1){ if(!on){l.e.setAttribute('opacity',0);continue} l.x=Math.random()<.5?lerp(R.cx-R.rx[1]+20,R.cx-R.rx[0]+40,Math.random()):lerp(R.cx+R.rx[0]-40,R.cx+R.rx[1]-20,Math.random()); l.y=lerp(R.floor-200,R.floor+40,Math.random()); l.len=lerp(50,130,Math.random()); l.life=lerp(.25,.5,Math.random()); l.age=0}
+    const y=l.y-l.age*600; l.e.setAttribute('x1',l.x);l.e.setAttribute('x2',l.x);l.e.setAttribute('y1',y);l.e.setAttribute('y2',y-l.len);
+    l.e.setAttribute('stroke-width',4);l.e.setAttribute('opacity',on?(1-l.age)*.85:0)}
+  if(on&&t>nextSpark){ sk.innerHTML=''; for(let n=0;n<2;n++){const a=Math.random()*Math.PI*2;let x=R.cx+Math.cos(a)*R.rx[0],y=R.cy+Math.sin(a)*R.ry[0],d=`M${x} ${y}`;
+      for(let i=0;i<6;i++){x+=lerp(-38,38,Math.random());y+=lerp(-55,-10,Math.random());d+=` L${x.toFixed(0)} ${y.toFixed(0)}`}
+      sk.insertAdjacentHTML('beforeend',`<path d="${d}" stroke="#ffb000" stroke-width="12" opacity=".6"/><path d="${d}" stroke="#fffbe0" stroke-width="5"/>`)}
+    sparkUntil=t+.09; nextSpark=t+lerp(.25,.9,Math.random())}
+  sk.setAttribute('opacity',on&&t<sparkUntil?1:0);
+  requestAnimationFrame(aura)}
+requestAnimationFrame(aura);
+const q=new URLSearchParams(location.search).get('mood'); if(q in MOODS)[...btns.children][Object.keys(MOODS).indexOf(q)].click();
+</script>
+</body>
+</html>

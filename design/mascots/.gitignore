@@ -1,0 +1,6 @@
+# Rebuildable from scripts/: frame folders, stills, work files, big proof images
+blender/*/renders/*/
+blender/*/work/
+blender/*/renders/rest_*.png
+__pycache__/
+*.blend1

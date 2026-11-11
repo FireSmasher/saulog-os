@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apoy Eagle Rig</title>
+<style>
+:root{--bg:#f6f4ee;--card:#fffdf8;--ink:#2a2420;--muted:#8a8178;--line:#e8e2d6;--accent:#ff6a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1714;--card:#25211d;--ink:#f3ede4;--muted:#a59b90;--line:#3a332c}}
+:root[data-theme="dark"]{--bg:#1a1714;--card:#25211d;--ink:#f3ede4;--muted:#a59b90;--line:#3a332c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,"Avenir Next",sans-serif;padding:24px 16px}
+h1{font-size:26px;margin:0 0 4px}
+p.sub{color:var(--muted);margin:0 0 16px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;max-width:1100px}
+@media (max-width:760px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px}
+.card h2{font-size:14px;color:var(--muted);margin:0 0 6px;font-weight:600}
+svg{width:100%;height:auto;display:block}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+button{font:inherit;font-weight:600;border:1px solid #e8e2d6;background:#fff;color:#2a2420;border-radius:999px;padding:8px 14px;cursor:pointer}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.orig{width:100%;border-radius:12px;background:#fffbf0}
+</style>
+</head>
+<body>
+<h1>Eagle rig test</h1>
+<p class="sub">Every part moves on its own: eyes look around and blink, nose twitches, mouth changes, ears wiggle, arms, legs and tail move. Left is the rig, right is the drawing you picked.</p>
+<div class="wrap">
+<div class="card" style="background:#fffbf0;color:#2a2420"><h2>Rig (live)</h2>
+<svg id="rig" viewBox="140 40 740 900" role="img" aria-label="Animated eagle">
+  <defs>
+    <clipPath id="eyeL"><ellipse cx="430" cy="402" rx="21" ry="19"/></clipPath><clipPath id="eyeR"><ellipse cx="585" cy="402" rx="21" ry="19"/></clipPath>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="#ff8a00" flood-opacity="0"/></filter>
+  <filter id="aura" x="-40%" y="-40%" width="180%" height="180%"><feMorphology in="SourceAlpha" operator="dilate" radius="14" result="d"/><feGaussianBlur in="d" stdDeviation="20" result="b"/><feFlood flood-color="#ffa000" result="c"/><feComposite in="c" in2="b" operator="in"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <radialGradient id="warm" cx="50%" cy="55%" r="50%"><stop offset="0" stop-color="#ff9a00" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a00" stop-opacity="0"/></radialGradient>
+  </defs>
+  <g id="powerBack" opacity="0"><ellipse cx="515" cy="560" rx="420" ry="460" fill="url(#warm)"/><ellipse id="ring" cx="505" cy="885" rx="200" ry="26" fill="none" stroke="#ff8a00" stroke-width="8"/></g>
+  <g id="streaks" stroke="#ffd36a" stroke-linecap="round"></g>
+  <g id="auraFx" filter="url(#soft)"></g>
+  <use id="auraGlow" href="#char" filter="url(#aura)" opacity="0"/>
+  <ellipse id="shadow" cx="505" cy="885" rx="180" ry="20" fill="rgba(70,45,25,.16)"/>
+  <g id="char" filter="url(#glow)" stroke="#3a1d17" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
+    <g id="tail"><path d="M425 230 L448 140 L488 192 L512 112 L540 186 L588 146 L590 232 Z" fill="#f4d9a3"/></g>
+    <g id="legL"><ellipse cx="398" cy="860" rx="48" ry="22" fill="#9aa6b2" stroke="#3e4a55"/><path d="M380 850 L376 872 M402 850 L402 874 M422 850 L428 872" stroke="#3e4a55" stroke-width="5"/></g>
+    <g id="legR"><ellipse cx="598" cy="860" rx="48" ry="22" fill="#9aa6b2" stroke="#3e4a55"/><path d="M580 850 L576 872 M602 850 L602 874 M622 850 L628 872" stroke="#3e4a55" stroke-width="5"/></g>
+    <g id="torso"><path d="M505 178 C645 178 735 300 735 525 C735 725 650 852 505 852 C360 852 275 725 275 525 C275 300 365 178 505 178 Z" fill="#fffaf0"/>
+      <g fill="#f4d9a3" stroke="none" opacity=".75"><ellipse cx="390" cy="600" rx="11" ry="15"/><ellipse cx="445" cy="630" rx="13" ry="11"/><ellipse cx="560" cy="640" rx="12" ry="10"/><ellipse cx="610" cy="610" rx="10" ry="13"/><ellipse cx="480" cy="680" rx="9" ry="12"/><ellipse cx="575" cy="700" rx="10" ry="9"/></g></g>
+    <g id="armL"><path d="M338 505 C292 545 266 645 286 765 Q296 792 312 782 C352 700 356 585 338 505 Z" fill="#7a4e3d"/><path d="M318 560 C304 620 300 680 306 735" fill="none" stroke="#5f3a2d" stroke-width="7"/></g>
+    <g id="armR"><path d="M682 505 C735 560 758 660 744 760 L758 818 Q734 830 702 782 C678 700 668 585 682 505 Z" fill="#7a4e3d"/><path d="M712 560 C726 620 730 680 724 735" fill="none" stroke="#5f3a2d" stroke-width="7"/></g>
+    <g id="head">
+      <path d="M505 365 L325 487 Q284 488 269 475 Q263 458 284 430 Q246 420 237 403 Q238 385 270 365 Q238 345 237 327 Q246 310 284 300 Q263 272 269 255 Q284 242 325 243 Q317 211 330 196 Q350 188 387 200 Q393 168 412 158 Q434 156 464 178 Q483 149 505 145 Q527 149 546 178 Q576 156 598 158 Q617 168 622 200 Q660 188 680 196 Q693 211 685 243 Q726 242 741 255 Q747 272 726 300 Q764 310 773 327 Q772 345 740 365 Q772 385 773 403 Q764 420 726 430 Q747 458 741 475 Q726 488 685 487 Z" fill="#f4d9a3"/>
+      <g fill="none" stroke="#e2b673" stroke-width="7" opacity=".8"><path d="M470 210 Q478 250 470 290"/><path d="M540 205 Q548 240 560 260"/><path d="M300 380 Q320 430 330 470"/><path d="M712 380 Q694 430 684 470"/></g>
+      <g id="earL"><circle cx="366" cy="300" r="31" fill="#6e4a3c"/></g>
+      <g id="earR"><circle cx="648" cy="300" r="31" fill="#6e4a3c"/></g>
+      <path d="M505 250 C592 250 650 305 652 395 C654 465 628 520 600 560 L410 560 C382 520 356 465 358 395 C360 305 418 250 505 250 Z" fill="#fffaf0" stroke="none"/>
+      <ellipse cx="398" cy="434" rx="30" ry="17" fill="#f6b8aa" opacity=".6" stroke="none"/><ellipse cx="616" cy="434" rx="30" ry="17" fill="#f6b8aa" opacity=".6" stroke="none"/>
+      <g id="eyes" stroke="none"><g clip-path="url(#eyeL)"><ellipse cx="430" cy="402" rx="21" ry="18" fill="#2a1512"/><g class="shine"><circle cx="437" cy="395" r="5" fill="#fff"/></g><g class="lid"><rect x="399" y="316" width="62" height="63" fill="#fffaf0"/><path d="M405 379 Q430 387 455 379" fill="none" stroke="#2a1512" stroke-width="6"/></g></g><g clip-path="url(#eyeR)"><ellipse cx="585" cy="402" rx="21" ry="18" fill="#2a1512"/><g class="shine"><circle cx="592" cy="395" r="5" fill="#fff"/></g><g class="lid"><rect x="554" y="316" width="62" height="63" fill="#fffaf0"/><path d="M560 379 Q585 387 610 379" fill="none" stroke="#2a1512" stroke-width="6"/></g></g></g>
+      <g id="brows" fill="none" stroke="#2a1512" stroke-width="11"><path d="M403 376 L458 392"/><path d="M612 376 L557 392"/></g>
+      <g id="mouths" stroke="#3e4a55" stroke-width="8">
+        <path data-m="w" d="M0 0" fill="none" stroke="none"/><path data-m="flat" d="M0 0" fill="none" stroke="none"/>
+        <ellipse data-m="smile" cx="508" cy="470" rx="22" ry="16" fill="#8a3330"/>
+        <ellipse data-m="o" cx="508" cy="474" rx="15" ry="18" fill="#8a3330"/>
+        <ellipse data-m="yawn" cx="508" cy="480" rx="24" ry="28" fill="#8a3330"/>
+        <ellipse data-m="grin" cx="508" cy="472" rx="30" ry="20" fill="#8a3330"/>
+      </g>
+      <g id="nose"><path d="M470 400 C468 368 548 368 546 400 C545 428 527 446 508 474 C489 446 471 428 470 400 Z" fill="#b7c9d8" stroke="#3e4a55" stroke-width="11"/>
+        <path d="M482 424 Q508 438 534 424 Q522 448 508 468 Q494 448 482 424 Z" fill="#8fa3b3" stroke="none"/></g>
+      <g id="flame"></g>
+    </g>
+  </g>
+  <g id="sparks" fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+  <g id="zzz" fill="#8a8178" font-weight="800" font-family="Avenir Next, sans-serif" opacity="0"><text x="760" y="300" font-size="40">z</text><text x="800" y="250" font-size="54">z</text><text x="850" y="190" font-size="70">Z</text></g>
+</svg>
+<div class="btns" id="btns"></div>
+</div>
+<div class="card"><h2>The drawing you picked</h2><img class="orig" src="../eagle_3.png" alt="Original eagle drawing"></div>
+</div>
+<script>
+const R={"tailAmp": 0.6, "lid": 46, "nose": [508, 420], "earL": [366, 300], "earR": [648, 300], "ground": [505, 870], "head": [505, 560], "shadow": [505, 885], "armL": [332, 512], "armR": [688, 512], "tail": [505, 225], "flame": [505, 150], "look": [6, 4], "cx": 505, "cy": 520, "rx": [265, 335], "ry": [330, 385], "floor": 860};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const MOODS={idle:'Idle',happy:'Happy',tired:'Tired',fire:'On fire',wave:'Wave',talk:'Talk'};
+let mood='idle';
+const btns=$('#btns');
+for(const [k,v] of Object.entries(MOODS)){const b=document.createElement('button');b.textContent=v;b.onclick=()=>{mood=k;t0=performance.now();$$('#btns button').forEach(x=>x.classList.toggle('on',x===b))};if(k==='idle')b.classList.add('on');btns.appendChild(b)}
+const el={char:$('#char'),head:$('#head'),torso:$('#torso'),earL:$('#earL'),earR:$('#earR'),armL:$('#armL'),armR:$('#armR'),legL:$('#legL'),legR:$('#legR'),tail:$('#tail'),nose:$('#nose'),flame:$('#flame'),shadow:$('#shadow'),zzz:$('#zzz'),glow:$('#glow feDropShadow')};
+const lids=$$('.lid'), shines=$$('.shine'), mouths=$$('#mouths [data-m]');
+const T=(e,s)=>e.setAttribute('transform',s);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let look={x:0,y:0,tx:0,ty:0,next:0}, blink={at:1.5,len:.14}, twitch={at:2}, talk={m:'w',next:0}, t0=performance.now();
+function setMouth(m){mouths.forEach(p=>p.style.display=p.dataset.m===m?'':'none')}
+function frame(now){
+  const t=now/1000, tm=(now-t0)/1000, S=Math.sin;
+  // eyes: pick a new spot to look at every 1 to 3 s, ease toward it
+  if(t>look.next){look.tx=rnd(-1,1);look.ty=rnd(-.6,.6);if(Math.random()<.3){look.tx=0;look.ty=0}look.next=t+rnd(1,3)}
+  look.x+=(look.tx-look.x)*.12; look.y+=(look.ty-look.y)*.12;
+  shines.forEach(s=>T(s,`translate(${look.x*R.look[0]} ${look.y*R.look[1]})`));
+  // blink
+  if(t>blink.at+blink.len){blink.at=t+rnd(1.8,4.5);if(Math.random()<.25)blink.at=t+.25}
+  let lid=0; const bp=(t-blink.at)/blink.len; if(bp>=0&&bp<=1)lid=S(bp*Math.PI);
+  let lidBase={tired:.55,happy:0,fire:0}[mood]||0;
+  if(mood==='happy')lidBase=.0;
+  lid=Math.max(lid,lidBase+(mood==='tired'?.12*S(t*.9):0));
+  lids.forEach(l=>T(l,`translate(0 ${lid*R.lid})`));
+  // nose twitch
+  if(t>twitch.at+.35)twitch.at=t+rnd(1.5,4);
+  const np=(t-twitch.at)/.35, nt=np>=0&&np<=1?S(np*Math.PI*3)*.18:0;
+  T(el.nose,`translate(${R.nose}) scale(${1+nt} ${1-nt*.6}) translate(${R.nose.map(v=>-v)})`);
+  // ears
+  const ew=mood==='happy'?8:mood==='tired'?-10:3;
+  T(el.earL,`rotate(${ew*.5+S(t*1.3)*ew*.4 - (mood==='tired'?8:0)} ${R.earL})`);
+  T(el.earR,`rotate(${-ew*.5-S(t*1.3+1)*ew*.4 + (mood==='tired'?8:0)} ${R.earR})`);
+  // body: breathing, hop, shake
+  const br=S(t*2*Math.PI/(mood==='tired'?4:2.8));
+  let hop=0,sx=1+br*-.012,sy=1+br*.02,shake=0,tilt=0;
+  if(mood==='happy'){const p=(tm*1.1)%1;hop=-Math.max(0,S(p*Math.PI))*70;const g=p<.1||p>.92;sx=g?1.08:.96;sy=g?.9:1.05}
+  if(mood==='fire'){hop=-Math.abs(S(t*9))*4;shake=S(t*31)*3.5}
+  if(mood==='tired'){tilt=S(t*.8)*4+3;sy=.97+br*.015}
+  T(el.char,`translate(${shake} ${hop}) translate(${R.ground}) scale(${sx} ${sy}) translate(${R.ground.map(v=>-v)})`);
+  T(el.head,`rotate(${tilt + (mood==='talk'?S(t*3)*3:0) + look.x*2} ${R.head})`);
+  T(el.shadow,`translate(${R.shadow}) scale(${1+hop/240}) translate(${R.shadow.map(v=>-v)})`);
+  el.shadow.setAttribute('opacity',1+hop/160);
+  // arms
+  let aL=S(t*1.5)*4, aR=-S(t*1.5)*4;
+  if(mood==='wave'){aR=-135+S(t*10)*22;aL=S(t*1.5)*4}
+  if(mood==='happy'){aL=125+S(t*14)*15;aR=-125-S(t*14)*15}
+  if(mood==='fire'){aL=95+S(t*9)*30;aR=-95+S(t*9+Math.PI)*30}
+  if(mood==='tired'){aL=-4+S(t*.8)*3;aR=4-S(t*.8)*3}
+  if(mood==='talk'){aR=-40+S(t*4)*25}
+  T(el.armL,`rotate(${aL} ${R.armL})`); T(el.armR,`rotate(${aR} ${R.armR})`);
+  // legs: stepping when excited
+  let lL=0,lR=0; if(mood==='fire'||mood==='happy'){const sp=mood==='fire'?9:7;lL=-Math.max(0,S(t*sp))*16;lR=-Math.max(0,-S(t*sp))*16}
+  T(el.legL,`translate(0 ${lL})`); T(el.legR,`translate(0 ${lR})`);
+  // tail
+  const tw=(mood==='tired'?4:mood==='fire'?22:12)*(R.tailAmp||1);
+  T(el.tail,`rotate(${S(t*(mood==='fire'?6:1.7))*tw} ${R.tail})`);
+  // mouth
+  let m='w';
+  if(mood==='happy')m='smile'; if(mood==='fire')m='grin';
+  if(mood==='tired'){m=(tm%6)>4.6?'yawn':'flat'}
+  if(mood==='wave')m=(tm%2)<1.2?'smile':'w';
+  if(mood==='talk'){if(t>talk.next){talk.m=['o','w','smile','o','flat'][Math.floor(rnd(0,5))];talk.next=t+rnd(.09,.2)}m=talk.m}
+  setMouth(m);
+  // flame
+  const fs=mood==='fire'?1.5+S(t*20)*.08:mood==='tired'?.55+S(t*2)*.04:1+S(t*12)*.05;
+  T(el.flame,`translate(${R.flame}) scale(${fs*(1+S(t*17)*.04)} ${fs*(1+S(t*13)*.07)}) rotate(${S(t*7)*4}) translate(${R.flame.map(v=>-v)})`);
+  el.flame.setAttribute('opacity',mood==='tired'?.6:1);
+  el.glow.setAttribute('flood-opacity',mood==='fire'?.55+S(t*8)*.2:0);
+  el.zzz.setAttribute('opacity',mood==='tired'?.5+S(t*1.5)*.4:0);
+  requestAnimationFrame(frame);
+}
+setMouth('w'); requestAnimationFrame(frame);
+// power-up aura: flame tongues rise off the body, streaks shoot up, sparks crackle
+const NS='http://www.w3.org/2000/svg', fx=$('#auraFx'), sk=$('#sparks'), st=$('#streaks');
+const TONGUE='M0 -1 C.55 -.45 .62 .45 0 .62 C-.62 .45 -.55 -.45 0 -1Z';
+const parts=[...Array(90)].map(()=>{const e=document.createElementNS(NS,'path');e.setAttribute('d',TONGUE);fx.appendChild(e);return{e,life:0,age:1}});
+const lines=[...Array(14)].map(()=>{const e=document.createElementNS(NS,'line');st.appendChild(e);return{e,age:1,life:1}});
+let sparkUntil=0,nextSpark=0,last=performance.now();
+const lerp=(a,b,k)=>a+(b-a)*k;
+function col(k){const c=k<.35?[[255,236,110],[255,170,20],k/.35]:[[255,170,20],[226,58,0],(k-.35)/.65];return`rgb(${c[0].map((v,i)=>Math.round(lerp(v,c[1][i],c[2]))).join(',')})`}
+function aura(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now; const on=mood==='fire', t=now/1000;
+  $('#powerBack').setAttribute('opacity',on?.9:0); $('#auraGlow').setAttribute('opacity',on?.75+Math.sin(t*10)*.2:0);
+  const r=$('#ring'), rp=(t*1.6)%1; r.setAttribute('rx',160+rp*170); r.setAttribute('ry',20+rp*22); r.setAttribute('opacity',on?(1-rp)*.8:0);
+  for(const p of parts){
+    p.age+=dt/p.life;
+    if(p.age>=1){ if(!on){p.e.setAttribute('opacity',0);continue}
+      const a=Math.random()*Math.PI*2; p.x=R.cx+Math.cos(a)*lerp(R.rx[0],R.rx[1],Math.random()); p.y=R.cy+Math.sin(a)*lerp(R.ry[0],R.ry[1],Math.random());
+      if(p.y>R.floor)p.y=R.floor; p.vx=(R.cx-p.x)*.35+lerp(-30,30,Math.random()); p.vy=-lerp(260,420,Math.random()); p.sz=lerp(32,78,Math.random()); p.life=lerp(.45,.9,Math.random()); p.age=0; p.ph=Math.random()*6}
+    p.x+=p.vx*dt+Math.sin(t*9+p.ph)*1.2; p.y+=p.vy*dt; const k=p.age, w=p.sz*(1-k*.6), h=p.sz*(1.2+k*1.4);
+    p.e.setAttribute('transform',`translate(${p.x} ${p.y}) scale(${w} ${h})`); p.e.setAttribute('fill',col(k)); p.e.setAttribute('opacity',on?(k<.15?k/.15:1-(k-.15)/.85)*.9:0)}
+  for(const l of lines){
+    l.age+=dt/l.life;
+    if(l.age>=1){ if(!on){l.e.setAttribute('opacity',0);continue} l.x=Math.random()<.5?lerp(R.cx-R.rx[1]+20,R.cx-R.rx[0]+40,Math.random()):lerp(R.cx+R.rx[0]-40,R.cx+R.rx[1]-20,Math.random()); l.y=lerp(R.floor-200,R.floor+40,Math.random()); l.len=lerp(50,130,Math.random()); l.life=lerp(.25,.5,Math.random()); l.age=0}
+    const y=l.y-l.age*600; l.e.setAttribute('x1',l.x);l.e.setAttribute('x2',l.x);l.e.setAttribute('y1',y);l.e.setAttribute('y2',y-l.len);
+    l.e.setAttribute('stroke-width',4);l.e.setAttribute('opacity',on?(1-l.age)*.85:0)}
+  if(on&&t>nextSpark){ sk.innerHTML=''; for(let n=0;n<2;n++){const a=Math.random()*Math.PI*2;let x=R.cx+Math.cos(a)*R.rx[0],y=R.cy+Math.sin(a)*R.ry[0],d=`M${x} ${y}`;
+      for(let i=0;i<6;i++){x+=lerp(-38,38,Math.random());y+=lerp(-55,-10,Math.random());d+=` L${x.toFixed(0)} ${y.toFixed(0)}`}
+      sk.insertAdjacentHTML('beforeend',`<path d="${d}" stroke="#ffb000" stroke-width="12" opacity=".6"/><path d="${d}" stroke="#fffbe0" stroke-width="5"/>`)}
+    sparkUntil=t+.09; nextSpark=t+lerp(.25,.9,Math.random())}
+  sk.setAttribute('opacity',on&&t<sparkUntil?1:0);
+  requestAnimationFrame(aura)}
+requestAnimationFrame(aura);
+const q=new URLSearchParams(location.search).get('mood'); if(q in MOODS)[...btns.children][Object.keys(MOODS).indexOf(q)].click();
+</script>
+</body>
+</html>
