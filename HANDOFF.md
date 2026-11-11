@@ -760,3 +760,16 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - "Log by hand" button under the exercise list: any exercise (suggestions from the plan and his history), any day up to today, any number of sets. If that exercise is already logged that day its sets open and Save replaces them (fixes a wrong set; empty = remove). Tapping a finished exercise opens it the same way. Rows not in today's plan show as "Also today". New `saveSets` in next/src/lib/workouts.ts, notes "saulog-next by hand".
 - Checked: npm test, build, headless Chrome on ?demo&tab=buhat (typed 4,5 -> 4.5 kg; logged DB Bench Press 20x6, 20x7, 22.5x7; reopened shows "Already logged"). Not checked on his phone. sw.js v25.
 - Next (Edwin 11 Nov): Duolingo-style reminders, friends, levels, Scriptable streak widget. Rulings in memory saulog_os_social_plan_2026-11-11. Blocker found: the 31 Oct morning paste was never run (push_subscriptions, day_marks, food_photos all 404).
+
+## UPDATE 2026-11-11 evening (Sevro): W2 merged, own-rows filter
+- Plan: docs/SOCIAL-PLAN.md (rulings from 24 questions). Research: docs/research/2026-11-11-duolingo.md.
+- W2 (Opus worker) merged: supabase/social-setup.sql (run AFTER next-setup.sql), next/src/lib/types-social.ts,
+  supabase/social-setup.test.md. Checked by the worker on a local Postgres 18: runs twice clean, ALL PASS.
+  Not run on live. Cleanup step of the test script never run (Jev #552 blocked it locally).
+- Review found: every own-data read relied on RLS alone. With crew read policies, friends' rows would mix
+  into his Kain and Buhat. Fixed before any SQL runs: myId() in next/src/lib/supabase.ts, .eq('user_id')
+  on food history, all-days, rest days, workouts; old app.js sbUserId()/mineFilter() on unsent-log keys
+  and health. sw.js v26.
+- OPEN before the first friend joins: hub/today.py (edwinsaulog-dashboard) and scripts/query-logs.py read
+  with the service role, so they will see every crew member. Both need a user_id filter.
+- OPEN (W2 risk 2): food_photos, meal-photos bucket, weight_logs, targets not shared with crew yet.

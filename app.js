@@ -401,6 +401,20 @@ async function supabaseRefresh() {
   return updated;
 }
 
+// The signed-in user's id, read from the access token. Reads of shared tables filter on it:
+// once friends share a crew, the database also returns their rows (11 Nov 2026).
+function sbUserId() {
+  try {
+    const t = loadSbSession()?.access_token || '';
+    const p = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(p)).sub || '';
+  } catch { return ''; }
+}
+function mineFilter() {
+  const id = sbUserId();
+  return id ? `&user_id=eq.${encodeURIComponent(id)}` : '';
+}
+
 async function supabaseRequest(path, options = {}) {
   if (!supabaseConfigured()) return null;
   const session = loadSbSession();
@@ -507,7 +521,7 @@ async function renderUnsent() {
 async function remoteKeys(table, cols, keyOf) {
   const keys = new Map();
   for (let offset = 0; ; offset += 1000) {
-    const res = await supabaseRequest(`/rest/v1/${table}?select=id,${cols}&order=id&limit=1000&offset=${offset}`, { method: 'GET' });
+    const res = await supabaseRequest(`/rest/v1/${table}?select=id,${cols}${mineFilter()}&order=id&limit=1000&offset=${offset}`, { method: 'GET' });
     if (!res || !res.ok) return null;
     const rows = await res.json();
     rows.forEach(r => keys.set(keyOf(r), r.id));
@@ -917,7 +931,7 @@ async function renderHealth() {
 
   try {
     const cols = 'steps,sleep_hours,active_energy_kcal,exercise_minutes,workout_type,resting_hr';
-    const res = await supabaseRequest(`/rest/v1/health_logs?select=${cols}&date=eq.${currentDate}&limit=1`);
+    const res = await supabaseRequest(`/rest/v1/health_logs?select=${cols}&date=eq.${currentDate}${mineFilter()}&limit=1`);
     const rows = res && res.ok ? await res.json() : [];
     const row = rows[0];
     if (!row) {

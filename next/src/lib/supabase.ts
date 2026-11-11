@@ -36,3 +36,12 @@ export async function loadTargets(): Promise<Targets | null> {
   if (error) throw error
   return data ? { kcal: Number(data.kcal), protein: Number(data.protein) } : null
 }
+
+// The signed-in user's id. Every read of a log table filters on it: once friends share a
+// crew, the database also returns their rows, and those must never mix into his own.
+export async function myId(): Promise<string> {
+  const { data } = await supabase.auth.getSession()
+  const id = data.session?.user.id
+  if (!id) throw new Error('Signed out')
+  return id
+}

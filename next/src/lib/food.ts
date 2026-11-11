@@ -1,4 +1,4 @@
-import { supabase, loadTargets, type Targets } from './supabase'
+import { supabase, loadTargets, myId, type Targets } from './supabase'
 import { addDays, localTime, type FoodLog } from './day'
 import { summarise, type DaySummary } from './rewards'
 import { loadWorkouts } from './workouts'
@@ -28,10 +28,12 @@ export function toLog(r: Record<string, unknown>): FoodLog {
 // Six weeks of rows, today included.
 async function loadHistory(today: string): Promise<FoodLog[]> {
   const out: FoodLog[] = []
+  const me = await myId()
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase
       .from('food_logs')
       .select(COLUMNS)
+      .eq('user_id', me)
       .gte('date', addDays(today, -HISTORY_DAYS))
       .lte('date', today)
       .order('date', { ascending: true })
@@ -47,10 +49,12 @@ async function loadHistory(today: string): Promise<FoodLog[]> {
 // and XP. Only three short columns, paged 1,000 rows at a time.
 async function loadAllDays(today: string): Promise<DaySummary[]> {
   const rows: { date: string; time: string; protein: number }[] = []
+  const me = await myId()
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase
       .from('food_logs')
       .select('date, time, protein')
+      .eq('user_id', me)
       .lte('date', today)
       .order('date', { ascending: false })
       .order('id', { ascending: true })
@@ -74,7 +78,9 @@ const localRest = (): string[] => {
 }
 
 async function loadRestDays(): Promise<string[]> {
-  const { data, error } = await supabase.from('day_marks').select('date').eq('kind', 'rest')
+  const me = await myId().catch(() => '')
+  if (!me) return localRest()
+  const { data, error } = await supabase.from('day_marks').select('date').eq('kind', 'rest').eq('user_id', me)
   if (error) return localRest()
   return [...new Set([...localRest(), ...(data ?? []).map((r) => String(r.date))])]
 }

@@ -1,6 +1,6 @@
 // Network side of Buhat: every strength row he has (old app and new), and saving a set.
 // One row per exercise per day, `sets` = [{weight, reps}], same shape the old app writes.
-import { supabase } from './supabase'
+import { myId, supabase } from './supabase'
 import { localTime } from './day'
 import { musclesFor, type WorkoutRow, type WSet } from './buhat'
 
@@ -16,10 +16,12 @@ function toRow(r: Record<string, unknown>): WorkoutRow | null {
 
 export async function loadWorkouts(): Promise<WorkoutRow[]> {
   const out: WorkoutRow[] = []
+  const me = await myId()
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase
       .from('workout_logs')
       .select('id, date, time, split, exercise, sets')
+      .eq('user_id', me)
       .order('date', { ascending: true })
       .order('time', { ascending: true })
       .range(from, from + PAGE - 1)
