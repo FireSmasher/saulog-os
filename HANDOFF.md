@@ -772,4 +772,4 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
   and health. sw.js v26.
 - OPEN before the first friend joins: hub/today.py (edwinsaulog-dashboard) and scripts/query-logs.py read
   with the service role, so they will see every crew member. Both need a user_id filter.
-- OPEN (W2 risk 2): food_photos, meal-photos bucket, weight_logs, targets not shared with crew yet.
+- DONE 11 Nov (Edwin: "share photos and weight"): crew read on food_photos, meal-photos files, weight_logs. targets stays private. Steps alone never keep a streak (Edwin: "no need to add steps keep streak").

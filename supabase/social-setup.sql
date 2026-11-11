@@ -640,6 +640,25 @@ drop policy if exists "freeze_purchases: owner insert" on public.freeze_purchase
 create policy "freeze_purchases: owner insert" on public.freeze_purchases
   for insert to authenticated with check (auth.uid() = user_id);
 
+-- ---- Shared with the crew too (Edwin 11 Nov: "share photos and weight"). Read only;
+-- writes stay owner-only through the existing policies. targets stays private on purpose.
+drop policy if exists "food_photos: crew select" on public.food_photos;
+create policy "food_photos: crew select" on public.food_photos
+  for select to authenticated using (public.shares_crew(user_id));
+
+drop policy if exists "weight_logs: crew select" on public.weight_logs;
+create policy "weight_logs: crew select" on public.weight_logs
+  for select to authenticated using (public.shares_crew(user_id));
+
+-- Photo files live at meal-photos/<user id>/<date>/<file>.jpg; a crew-mate may read them.
+drop policy if exists "meal-photos: crew read" on storage.objects;
+create policy "meal-photos: crew read" on storage.objects
+  for select to authenticated using (
+    bucket_id = 'meal-photos'
+    and (storage.foldername(name))[1] ~ '^[0-9a-f-]{36}$'
+    and public.shares_crew(((storage.foldername(name))[1])::uuid)
+  );
+
 -- =====================================================================================
 -- 6. Grants (RLS still decides which rows; see the note at the end of schema.sql)
 -- =====================================================================================
