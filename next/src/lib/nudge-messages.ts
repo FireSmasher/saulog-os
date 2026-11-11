@@ -70,14 +70,14 @@ const MEAL: Group = {
     ['{streak} days of discipline', 'Protect the pattern. Log {meal} now.'],
   ],
   savage: [
-    ['{Meal} won’t log itself', 'Accurate data beats perfect excuses. Log {meal}: photo, grams, done. Now.'],
+    ['{Meal} won’t log itself', 'Stop fucking around and log {meal}. Photo, grams, done.'],
     ['Data first, damn it', '{Meal} is still not logged. Do it before you touch anything else.'],
-    ['Guessing is not a plan', 'Log {meal} and check your protein. Then plan the next meal like you mean it.'],
-    ['One rep. That’s it.', 'You’ve lifted heavier things than a phone. Log {meal}.'],
-    ['Numbers don’t lie', '{kcalLeft} kcal left. "About that much" is not a number. Log {meal}.'],
+    ['Guessing is bullshit', 'Log {meal} and check your protein. Then plan the next meal like you mean it.'],
+    ['One rep. That’s it.', 'You’ve lifted heavier shit than a phone. Log {meal}.'],
+    ['Numbers don’t lie', '{kcalLeft} kcal left. "About that much" is not a damn number. Log {meal}.'],
     ['You ate. Prove it.', 'The excuse takes longer than the log. Log {meal}, for fuck’s sake.'],
-    ['No days off from basics', 'Every {meal} gets logged. Including this one. Move.'],
-    ['{streak} days. Don’t blink now.', 'Protect what you built. Log {meal}, right now.'],
+    ['No days off from basics', 'Every {meal} gets logged. Including this one. Haul ass and log it.'],
+    ['{streak} days. Don’t blink.', 'You built that. Don’t piss it away. Log {meal}, right now.'],
   ],
 }
 
@@ -113,14 +113,14 @@ const WORKOUT: Group = {
     ['{streak} days of habits', 'Stack a workout on top. {session}, set one, now.'],
   ],
   savage: [
-    ['{session}. Now.', 'Training day. Warm up, then log your first working set. No negotiating.'],
+    ['{session}. Now.', 'Warm up, then log your first working set. No fucking negotiating.'],
     ['Show the hell up', 'That’s the whole job. Start {session} and log set one.'],
-    ['The plan doesn’t care', 'Your mood is not on the program. {session} is. Start the first set now.'],
-    ['Last week is laughing', 'Beat one lift from last time in {session}. Log it and shut it up.'],
-    ['No time? Bullshit.', 'You have 20 minutes. Spend them on {session}.'],
-    ['Motivation is a no-show', 'Train anyway. Start {session}, first set, right now.'],
+    ['The plan doesn’t give a shit', 'Your mood is not on the program. {session} is. Start the first set now.'],
+    ['Last week is laughing', 'Beat one lift from last time in {session}. Log it and shut that shit up.'],
+    ['No time? Bullshit.', 'You have 20 minutes. Spend them on {session}. Start now.'],
+    ['Motivation is a no-show', 'Who gives a damn. Train anyway. Start {session}, first set, right now.'],
     ['Earn your damn rest', 'Train {session}, log each set, then rest. In that order.'],
-    ['{streak} days. Add iron.', 'Stack {session} on that streak. Set one, now.'],
+    ['{streak} days. Add iron.', 'Don’t half-ass today. Stack {session} on that streak. Set one, now.'],
   ],
 }
 
@@ -156,14 +156,14 @@ const WALK: Group = {
     ['{streak} days of logging', 'Now log some movement too. Walk 10 minutes.'],
   ],
   savage: [
-    ['Move. Now.', 'No activity logged today. Walk 10 minutes, then log it. Go.'],
-    ['{steps} steps won’t cut it', 'Below goal. Brisk 15 minute walk. Shoes on, door open, go.'],
-    ['The couch isn’t recovery', 'An easy walk is. 10 minutes. Log it. Done.'],
-    ['10 minutes. No debate.', 'You’ve spent longer deciding. Start the timer and walk.'],
+    ['Move. Now.', 'No activity logged today. Get your ass out for 10 minutes, then log it.'],
+    ['{steps} steps won’t cut it', 'That’s bullshit and you know it. Brisk 15 minute walk. Log it.'],
+    ['The couch isn’t recovery', 'An easy walk is. 10 damn minutes. Log it.'],
+    ['10 minutes. No debate.', 'You’ve spent longer deciding, for fuck’s sake. Start the timer and walk.'],
     ['Basics, damn it', 'Movement is the base. Walk and log it. No shortcuts.'],
-    ['Sitting is winning', 'Not on your watch. Walk 10 minutes, log it, then sit again.'],
+    ['Sitting is winning', 'Like hell it is. Walk 10 minutes, log it, then sit again.'],
     ['Coffee, then walk', 'After this coffee you walk 10 minutes. Then you log it. Done.'],
-    ['{streak} days. Now move.', 'Logging is half the job. Walk 10 minutes and log it.'],
+    ['{streak} days. Now move.', 'Logging is half the damn job. Walk 10 minutes and log it.'],
   ],
 }
 
@@ -200,13 +200,13 @@ const STREAK: Group = {
   ],
   savage: [
     ['Protect the damn streak', 'Nothing logged today. One log keeps the chain. Now, not later.'],
-    ['{streak} days. Don’t waste them.', 'You earned those. Log one meal before midnight.'],
-    ['{hoursLeft} h. Move it.', 'The minimum is one log. No excuse is smaller than that. Log it.'],
-    ['One entry. That’s it.', 'Meal, walk or set. Log it, then go to bed.'],
-    ['Chain’s about to snap', 'Today is the loose link. Fix it. Log one thing.'],
+    ['{streak} days. Don’t waste them.', 'You earned that shit. Log one meal before midnight.'],
+    ['{hoursLeft} h. Move your ass.', 'The minimum is one log. No excuse is smaller than that. Log it.'],
+    ['One entry. That’s it.', 'Meal, walk or set. Log the damn thing, then go to bed.'],
+    ['Chain’s about to snap', 'Hell no. Today is the loose link. Fix it. Log one thing.'],
     ['Guess the grams. Who cares?', 'A rough log beats a perfect excuse. Log today’s food.'],
-    ['Last job of the day', 'One log. Do it before you brush your teeth.'],
-    ['Bad day? Still counts.', 'Hard days are where habits get built. Log one thing. Go.'],
+    ['Last job of the day', 'One fucking log. Do it before you brush your teeth.'],
+    ['Bad day? Still counts.', 'Bad days are where habits get built. No bullshit. Log one thing. Go.'],
   ],
 }
 
@@ -227,9 +227,9 @@ const FRIEND_WORKOUT: Group = {
     ['Accountability ping', '{friend} did {session}. Give kudos, then log yours.'],
   ],
   savage: [
-    ['{friend} did the work', '{session} done. Where’s yours? Log your next session.'],
-    ['{friend} raised the bar', '{session} is done. Your excuse isn’t. Train today.'],
-    ['{friend} showed up. You?', '{session} logged. Send kudos, then go earn your own.'],
+    ['{friend} did the work', '{session} done. Where the hell is yours? Log your next session.'],
+    ['{friend} raised the bar', '{session} is done. Your excuse isn’t. Cut the crap and train today.'],
+    ['{friend} showed up. You?', '{session} logged. Send kudos, then go earn your own damn session.'],
   ],
 }
 
@@ -250,8 +250,8 @@ const FRIEND_STREAK: Group = {
     ['Crew milestone', '{friend} hit {friendStreak} days. Send kudos, then protect yours.'],
   ],
   savage: [
-    ['{friend}: {friendStreak} days', 'That’s what consistency looks like. Stop admiring it. Log today.'],
-    ['{friendStreak} days. No excuses.', '{friend} found time every day. So can you. Log one thing.'],
+    ['{friend}: {friendStreak} days', 'That’s what consistency looks like. Stop admiring that shit. Log today.'],
+    ['{friendStreak} days. No bullshit.', '{friend} found time every day. So can you. Log one thing.'],
     ['{friend} keeps showing up', '{friendStreak} days. Kudos, then go protect your own damn streak.'],
   ],
 }
@@ -273,9 +273,9 @@ const FRIEND_PASSED: Group = {
     ['Compete', '{friend} passed you. Respond with work: log today’s session.'],
   ],
   savage: [
-    ['{friend} just passed you', 'XP is earned daily. Go earn yours. Log meals and training today.'],
-    ['Gap to close. Now.', '{friend} is ahead this week. A workout day is +15 XP. Go take it.'],
-    ['Respond with work', '{friend} passed you. Complaining earns 0 XP. Log today’s session.'],
+    ['{friend} just passed you', 'XP is earned daily. Get your ass moving. Log meals and training today.'],
+    ['Gap to close. Now.', '{friend} is ahead this week. A workout day is +15 XP. Go take the damn thing.'],
+    ['Respond with work', '{friend} passed you. Complaining earns 0 fucking XP. Log today’s session.'],
   ],
 }
 
@@ -299,9 +299,9 @@ const BACKOFF_PAUSE: Group = {
     ['Start small again', 'Nudges paused. When you return, log one thing. That’s step one.'],
   ],
   savage: [
-    ['Pausing. Not quitting.', 'Reminders paused. When the excuses run out, restart with one easy log.'],
-    ['Pause, not quit', 'No nudges for now. Restarting takes one log. That’s it. Log one meal.'],
-    ['Silence. Your move.', 'Reminders are off. One log turns them back on. Make it.'],
+    ['Pausing. Not quitting.', 'Reminders paused. When the bullshit excuses run out, restart with one easy log.'],
+    ['Pause, not quit', 'No nudges for now. Restarting takes one damn log. Log one meal.'],
+    ['Silence. Your move.', 'Reminders are off. Quit the bullshit and log one thing to turn them back on.'],
     ['Ball’s in your court', 'Nudges paused. Come back and log one damn thing. That’s step one.'],
   ],
 }
@@ -326,10 +326,10 @@ const BACKOFF_LAST: Group = {
     ['Day one again', 'Everyone restarts. Log one meal and you’re back in.'],
   ],
   savage: [
-    ['Restart. Today.', 'The best restart is small. Log one meal today. Stop waiting.'],
-    ['Clean slate, no excuses', 'Streaks start again any day. Make it today: log one thing.'],
-    ['Last check-in. Listen up.', 'No more nudges after this. Log once and the system restarts.'],
-    ['Day one again. So what?', 'Everyone restarts. Log one meal and get back in the fight.'],
+    ['Restart. Today.', 'The best restart is small. Log one meal today. Stop waiting, damn it.'],
+    ['Clean slate, no excuses', 'Streaks start again any day. Make it today, for fuck’s sake: log one thing.'],
+    ['Last check-in. Listen up.', 'No more nudges after this. Log once and this shit restarts.'],
+    ['Day one again. So what?', 'Everyone restarts. Log one meal and get back in the damn fight.'],
   ],
 }
 

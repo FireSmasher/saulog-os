@@ -239,12 +239,21 @@ test('streak saver: 3 h and 1 h before midnight, only when nothing is logged', (
   const twice = [sent(today, '21:00', 'streak_saver'), sent(today, '22:55', 'streak_saver')]
   assert.equal(saver(s(twice), '23:58'), undefined)
   assert.equal(saver(s([], [row('walk', today, '20:00')]), '21:30'), undefined)
-  assert.equal(saver(state({ logs, restToday: true }), '21:30'), undefined)
+  assert.equal(saver(state({ logs, restToday: true, streak: 5 }), '21:30'), undefined)
+})
+
+test('streak saver needs a streak of at least 2 days', () => {
+  const today = '2026-11-11'
+  const logs = [row('dinner', addDays(today, -1), '19:00')]
+  const saver = (streak: number) => candidates(state({ logs, streak }), at(today, '21:00')).find((c) => c.goal === 'streak_saver')
+  assert.equal(saver(0), undefined)
+  assert.equal(saver(1), undefined)
+  assert.deepEqual(saver(2)?.vars, { streak: '2', hoursLeft: '3' })
 })
 
 test('streak saver on the clock-change days fires at 21:00 local', () => {
-  const autumn = state({ logs: [row('dinner', '2026-10-24', '19:00')] })
-  const spring = state({ logs: [row('dinner', '2026-03-28', '19:00')] })
+  const autumn = state({ logs: [row('dinner', '2026-10-24', '19:00')], streak: 3 })
+  const spring = state({ logs: [row('dinner', '2026-03-28', '19:00')], streak: 3 })
   const has = (st: NudgeState, utc: string) => goals(candidates(st, new Date(utc))).includes('streak_saver')
   assert.equal(has(autumn, '2026-10-25T19:59:00Z'), false) // 20:59 CET
   assert.equal(has(autumn, '2026-10-25T20:00:00Z'), true) // 21:00 CET
@@ -405,6 +414,22 @@ test('no em dash, at most one emoji, no banned word', () => {
     assert.ok(!text.includes('—') && !text.includes('–'), `${t.id} has a dash`)
     assert.ok((text.match(emoji) ?? []).length <= 1, `${t.id} has emoji`)
     for (const w of BANNED) assert.ok(!new RegExp(`\\b${w}\\b`, 'i').test(text), `${t.id} uses "${w}"`)
+  }
+})
+
+test('savage mode swears: at least 75% overall and 6 of 8 in every full list', () => {
+  const swear = /\b(fuck\w*|shit\w*|bullshit|damn\w*|hell|ass|crap|piss\w*)\b/i
+  const savage = POOL.filter((t) => t.tone === 'savage')
+  const swears = (t: (typeof savage)[number]) => swear.test(`${t.title} ${t.body}`)
+  assert.ok(savage.filter(swears).length / savage.length >= 0.75)
+  const groups = new Map<string, typeof savage>()
+  for (const t of savage) {
+    const key = t.id.split('.')[0]
+    groups.set(key, [...(groups.get(key) ?? []), t])
+  }
+  for (const [key, list] of groups) {
+    const need = list.length >= 8 ? 6 : Math.ceil(list.length * 0.75)
+    assert.ok(list.filter(swears).length >= need, `${key}: ${list.filter(swears).length} of ${list.length}`)
   }
 })
 
