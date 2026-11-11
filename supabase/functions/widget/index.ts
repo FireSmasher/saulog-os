@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
   const now = localNow((settings?.timezone as string | undefined) || DEFAULT_TZ)
 
   // Dates only, newest 800 days, paged because the API returns at most 1000 rows a call.
-  async function dates(table: string): Promise<Set<string>> {
+  async function dates(table: string, kind?: string): Promise<Set<string>> {
     const out = new Set<string>()
     const since = addDays(now.date, -800)
     for (let from = 0; from < 20000; from += 1000) {
@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
         .from(table)
         .select('date')
         .eq('user_id', userId)
+        .match(kind ? { kind } : {})
         .gte('date', since)
         .order('date', { ascending: false })
         .range(from, from + 999)
@@ -72,7 +73,7 @@ Deno.serve(async (req) => {
   }
 
   const [food, workouts, activity, rest] = await Promise.all([
-    dates('food_logs'), dates('workout_logs'), dates('activity_logs'), dates('day_marks'),
+    dates('food_logs'), dates('workout_logs'), dates('activity_logs'), dates('day_marks', 'rest'),
   ])
   const r = streakOf({
     loggedDays: food,
