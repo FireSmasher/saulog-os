@@ -1,0 +1,118 @@
+/* Move card on Kain: kind chips, minutes, km, one Log button, today's list. */
+.move {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.move .card-title {
+  margin: 0;
+}
+
+.move-kinds,
+.move-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.move-chip {
+  height: 36px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--edge);
+  background: var(--chip);
+  color: var(--ink);
+  font: 600 14px/1 var(--font);
+}
+
+.move-chip.on {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: transparent;
+}
+
+.move-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.move-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  flex: 1;
+  min-width: 0;
+}
+
+.move-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 600 16px/1 var(--font); /* 16px stops iOS zooming in */
+  outline: none;
+}
+
+.move-field small {
+  font: var(--t-small);
+  color: var(--ink2);
+}
+
+.move-log {
+  flex: 0 0 auto;
+  padding: 0 26px;
+}
+
+.move-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.move-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  border-top: 1px solid var(--line);
+}
+
+.move-what {
+  font: var(--t-section);
+}
+
+.move-num {
+  flex: 1;
+  color: var(--ink2);
+  font: var(--t-label);
+}
+
+.move-x {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--ink2);
+  display: grid;
+  place-items: center;
+}
+
+.move-x svg {
+  width: 16px;
+  height: 16px;
+}
+
+.move-steps {
+  margin: 0;
+}
