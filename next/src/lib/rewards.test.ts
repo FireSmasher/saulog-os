@@ -86,3 +86,11 @@ test('move XP: max(minutes / 2, steps / 500), floored, capped at 30', () => {
   const r = rewards({ days: [], activity: new Map([['2026-10-01', { minutes: 40, steps: 0 }]]), today: '2026-10-01', proteinTarget: 160 })
   assert.equal(r.xp, 20)
 })
+
+test('steps give XP on a logged day but never keep a streak alone', () => {
+  const base = { days: [], workoutDays: new Set(['2026-11-10']), today: '2026-11-11', proteinTarget: 160 }
+  const plain = rewards(base)
+  const withSteps = rewards({ ...base, steps: new Map([['2026-11-10', 8000], ['2026-11-11', 9000]]) })
+  assert.equal(withSteps.xp - plain.xp, 16) // 8000 / 500 on the workout day; today has no log
+  assert.equal(withSteps.todayCounts, false)
+})

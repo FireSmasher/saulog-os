@@ -89,11 +89,12 @@ type Input = {
   workoutDays?: Set<string>
   restDays?: Set<string>
   activity?: Map<string, MoveDay> // days with an activity row, with minutes and steps
+  steps?: Map<string, number> // Apple Health steps per day: XP only, never keeps a streak alone
   today: string
   proteinTarget: number
 }
 
-export function rewards({ days, workoutDays = new Set(), restDays = new Set(), activity = new Map(), today, proteinTarget, extraXp = 0 }: Input): Rewards {
+export function rewards({ days, workoutDays = new Set(), restDays = new Set(), activity = new Map(), steps = new Map(), today, proteinTarget, extraXp = 0 }: Input): Rewards {
   const byDate = new Map(days.map((d) => [d.date, d]))
   const counted = (date: string) => byDate.has(date) || workoutDays.has(date) || restDays.has(date) || activity.has(date)
   const allDates = [...byDate.keys(), ...workoutDays, ...restDays, ...activity.keys()].filter((d) => d <= today).sort()
@@ -110,7 +111,7 @@ export function rewards({ days, workoutDays = new Set(), restDays = new Set(), a
     if (counted(day)) {
       streak++
       best = Math.max(best, streak)
-      xp += dayXp(byDate.get(day), proteinTarget, workoutDays.has(day)) + moveXp(activity.get(day)) + milestoneXp(streak)
+      xp += dayXp(byDate.get(day), proteinTarget, workoutDays.has(day)) + moveXp({ minutes: activity.get(day)?.minutes ?? 0, steps: Math.max(activity.get(day)?.steps ?? 0, steps.get(day) ?? 0) }) + milestoneXp(streak)
       if (streak % 7 === 0) freezes = Math.min(2, freezes + 1)
     } else if (isToday) {
       // not over yet

@@ -59,6 +59,7 @@ export function rewardsOf(d: KainData, today: string) {
     workoutDays: new Set(d.workoutDays),
     restDays: new Set(d.restDays),
     activity: moveDays(d),
+    steps: new Map(Object.entries(d.steps ?? {})),
     today,
     proteinTarget: d.targets?.protein ?? 0,
     extraXp: 25 * (d.workoutBests ?? 0),
