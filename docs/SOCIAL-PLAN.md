@@ -39,7 +39,7 @@ Levels:
 - Move XP: higher of minutes (1 per 2 min) or steps (1 per 500), max 30 a day.
 Widget: Scriptable, streak only: flame, day count, done today or not, looks worse toward
 midnight when not done.
-Name: "Apoy". FULL rename including the URL (repo becomes apoy). Do it LAST: first the old
+Name: "Apoy". FULL rename including the URL (repo becomes apoy). New icon at the same time (Edwin 11 Nov: "Apoy flame", "With the Apoy rename"): a simple flame in the app's blue accent on white, matching the in-app and widget streak flame; replaces the pink S icon (next/public/icons, apple-touch-icon). One remove and re-add covers icon plus URL. Do it LAST: first the old
 app's "Send N unsent logs" and Quarters checked, then rename, then Edwin reinstalls from
 the new URL. The local folder name never changes.
 Order: Edwin first (reminders, Move, Health, widget), then friends (sign-up, crew, feed,
