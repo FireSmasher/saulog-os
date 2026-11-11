@@ -52,8 +52,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(caches.match(request, { cacheName: CACHE }).then((hit) => hit || fetch(request)))
 })
 
-// ---------- Daily reminder (phase 6) ----------
-// The Edge Function push-daily sends {title, body, url}. Tapping opens the app.
+// ---------- Reminders (W7) ----------
+// The Edge Function nudge sends {title, body, url, event_id, tag, api, key}. Plain
+// showNotification with no requireInteraction, so it still shows (quietly) under Focus and
+// Sleep. Tapping opens the app and, when it can, reports the tap (mark_push_opened RPC).
 self.addEventListener('push', (event) => {
   let data = { title: 'Saulog OS', body: 'Nothing logged yet today. Snap your next meal.', url: './' }
   try {
@@ -66,19 +68,63 @@ self.addEventListener('push', (event) => {
       body: data.body,
       icon: './icons/icon-192.png',
       badge: './icons/icon-192.png',
-      tag: 'saulog-daily',
-      data: { url: data.url },
+      tag: typeof data.tag === 'string' && data.tag ? data.tag : 'saulog-daily',
+      data: { url: data.url, eventId: data.event_id || null, api: data.api || null, key: data.key || null },
     })
   )
 })
 
+// The session token, if the app stored one where a worker can read it. The app's Supabase
+// session lives in localStorage, which a worker cannot read, so the contract is: the app MAY
+// put {"access_token": "...", "expires_at": <unix seconds>} at SESSION_URL in the Cache
+// Storage cache SESSION_CACHE (a name outside PREFIX, so activate never deletes it).
+// No entry, an expired token or any error: null, and the tap is simply not reported.
+const SESSION_CACHE = 'apoy-session'
+const SESSION_URL = './__session'
+
+async function storedToken() {
+  try {
+    const cache = await caches.open(SESSION_CACHE)
+    const hit = await cache.match(new URL(SESSION_URL, self.registration.scope).href)
+    if (!hit) return null
+    const s = await hit.json()
+    if (!s || typeof s.access_token !== 'string') return null
+    if (typeof s.expires_at === 'number' && s.expires_at * 1000 < Date.now()) return null
+    return s.access_token
+  } catch {
+    return null
+  }
+}
+
+async function reportOpened(d) {
+  if (!d || !d.eventId) return
+  try {
+    // An open window may report it with its own session (optional; ignored when unhandled).
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    for (const w of wins) w.postMessage({ type: 'apoy-push-opened', eventId: d.eventId })
+    const token = await storedToken()
+    if (!token || !d.api || !d.key) return // nothing proves who he is: skip quietly
+    await fetch(String(d.api).replace(/\/+$/, '') + '/rest/v1/rpc/mark_push_opened', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: d.key, Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ event_id: d.eventId }),
+    })
+  } catch {
+    // offline or blocked: the open is not counted, nothing else changes
+  }
+}
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const target = new URL(event.notification.data?.url || './', self.registration.scope).href
+  const d = event.notification.data || {}
+  const target = new URL(d.url || './', self.registration.scope).href
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
-      const open = wins.find((w) => w.url.startsWith(self.registration.scope))
-      return open ? open.focus() : self.clients.openWindow(target)
-    })
+    Promise.all([
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+        const open = wins.find((w) => w.url.startsWith(self.registration.scope))
+        return open ? open.focus() : self.clients.openWindow(target)
+      }),
+      reportOpened(d),
+    ])
   )
 })
