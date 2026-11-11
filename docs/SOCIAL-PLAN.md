@@ -23,8 +23,17 @@ tap-to-log for any kind (walk, run, bike, row, stairs, other).
 2. Messages rotate from a pool; a message used recently is less likely (novelty); pick by
    which messages led to a log within 2 h (simple bandit). Log every send.
 3. A late "streak at risk" nudge (about 3 h before midnight) only when nothing is logged today.
-4. Back off when ignored: after 7 days with no log after any nudge, halve the reminders;
-   after 14, send one goodbye ("We'll stop reminding you") and stop until the next log.
+4. Back off when ignored (W1, reported pattern): daily reminders for up to 7 days without a
+   log; day 8 one "these don't seem to be working, pausing" message, then silence; one last
+   check-in around day 18; nothing after that until the next log restarts it.
+   W1 numbers for rule 2 (KDD 2020, confirmed): reward = a log within 2 h of the push;
+   recency penalty 0.017 x 0.5^(days since that message was sent / 15); pick by softmax.
+   With under 10 people, shrink each message's score hard toward the pool average (prior of
+   about 20 sends) so one lucky send does not decide. First reminder time with no history:
+   23.5 h after the last log (reported), else the defaults in W3.
+   Widget (confirmed): only streak and done or not done today; the flame looks worse toward
+   midnight when not done. Streak needs one log only (confirmed).
+   Full research: docs/research/2026-11-11-duolingo.md.
 5. Hard caps: max 3 pushes a day per person, none 22:30 to 07:30 local, never two within 90 min.
 6. Friends: "Ana just finished Upper" goes out at most once a day per friend, and never in
    quiet hours.
