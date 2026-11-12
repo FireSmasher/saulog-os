@@ -122,3 +122,10 @@ commits and pushes (standing order), and keeps HANDOFF.md current.
 2. Deploy Edge Functions `nudge` and `widget` and paste the secrets (VAPID, CRON_SECRET).
 3. Install Scriptable, paste the widget script, add the widget.
 4. Send the invite link to friends.
+
+## Mascots (rulings 12 Nov)
+
+Accepted as rendered (design/mascots/blender/*). One per tab: tarsier on the streak card and
+the app icon, carabao on Kain, eagle on Buhat. Mood follows the day: happy after a log, tired
+late with nothing logged, fire on streak milestones. Built in AFTER W5, together with the
+Apoy rename and icon (one rebuild).
