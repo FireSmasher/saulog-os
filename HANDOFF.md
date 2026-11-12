@@ -783,3 +783,18 @@ New app source in `next/` (Vite + React + TypeScript), built and served at the /
 - Push taps: app keeps its token in Cache Storage (apoy-session) so the worker can call mark_push_opened.
 - Not written: supabase/nudge-setup.test.md (Jev #556, credential-looking curl). Deploy checks go in chat instead.
 - Jev fix in progress: own_cleared_public_push (plain push, root-owned data/public_push_repos.txt, clean diff).
+
+## UPDATE 2026-11-12 (Sevro): mascots done, paused
+- Pushed c4707ff (mascots: picked drawings tarsier_3, eagle_3, carabao_7; code rigs; Blender cut-out rigs
+  with 6 loops each, renders/index.html per character) and e03c22b (placement rulings in docs/SOCIAL-PLAN.md).
+- Mascots ACCEPTED as rendered (Edwin 12 Nov: "good with it"). Known small flaws left as is: thin raised eagle
+  wings, bar-like tarsier fire flames, thin raised arm in wave/talk. Notes: docs/mascots/*-STEPS.md.
+- Placement: tarsier streak card + app icon, carabao Kain, eagle Buhat; mood follows the day. Build AFTER W5,
+  in the same rebuild as the Apoy rename and icon.
+- NEXT: Edwin's phone setup (Daily reminder on, widget code, log workout), then check push_subscriptions and
+  cron 'apoy-nudge' runs, then W5 (sign-up, crew, feed, kudos, comments, challenges, weekly table), then
+  rename + icon + mascots LAST (after the old app's "Send N unsent logs").
+- Still open: rotate CRON_SECRET (seen in screenshots); reminder card copy "One nudge a day" is outdated;
+  user_id filter in hub/today.py and scripts/query-logs.py before the first friend; Jev personal-data check
+  (branch jev-personal-data-2026-11-11) not installed; Jev #555 #556 open.
+- Budget: Edwin 11 Nov "do not finish my weekly limit for tokens in claude, use the minimum amount".
